@@ -3,7 +3,7 @@ package BillboardServer;
 import java.sql.*;
 
 public class ConnectToDatabase {
-    public static void connect(String url, String schema, String username, String password){
+    public static Connection connect(String url, String schema, String username, String password){
         try{
             // Initialize Drivers
             Class.forName("org.mariadb.jdbc.Driver");
@@ -17,7 +17,7 @@ public class ConnectToDatabase {
                 //Create SQL statements to check if tables exist
                 createTablesIfNotExists(con);
 
-                con.close();
+                return con;
             }
             catch(Exception e){
                 if (e.getMessage().contains("Unknown database")){
@@ -28,6 +28,8 @@ public class ConnectToDatabase {
         catch(Exception e){
             System.out.println(e);
         }
+
+        return null;
     }
 
     public static void createTablesIfNotExists(Connection con) {

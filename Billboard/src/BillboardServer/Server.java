@@ -1,45 +1,27 @@
 package BillboardServer;
 
 import java.io.*;
-import java.sql.*;
-import java.util.*;
+import java.net.*;
 
 public class Server {
-    public static void main(String args[]){
+    int port;
 
-        Properties properties = new Properties();
-        try{
-            properties = getDBProperties();
-        } catch (IOException e) {
-            System.out.println(e);
-        }
-
-        if (properties != null) {
-            ConnectToDatabase.connect(properties.getProperty("jdbc.url"), properties.getProperty("jdbc.schema"), properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
-        }
+    public Server(int port){
+        this.port = port;
     }
 
-    public static Properties getDBProperties() throws IOException{
-        try{
-            Properties properties = new Properties();
-
-            String propFileName = "db.props";
-
-            InputStream inputStream = Server.class.getResourceAsStream(propFileName);
-
-            if (inputStream != null) {
-                properties.load(inputStream);
-            } else {
-                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
-            }
-
-            return properties;
-        }
-        catch (Exception e){
+    public void startServer(){
+        try (
+                ServerSocket serverSocket = new ServerSocket(this.port);
+                Socket clientSocket = serverSocket.accept();
+                PrintWriter out =
+                        new PrintWriter(clientSocket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(clientSocket.getInputStream()));
+        ) {
+            System.out.println(serverSocket.getInetAddress().getHostAddress());
+        }catch(Exception e){
             System.out.println(e);
         }
-
-        return null;
     }
 }
-
