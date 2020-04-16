@@ -1,6 +1,8 @@
 package BillboardServer;
 
 import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.sql.*;
 import java.util.*;
 
@@ -13,7 +15,7 @@ public class SetupServer {
         }
     }
 
-    public static void runServer() throws SQLException, IOException {
+    public static void runServer() throws SQLException, IOException, ClassNotFoundException {
         Properties properties = new Properties();
         try{
             properties = getDBProperties();
@@ -26,9 +28,19 @@ public class SetupServer {
 
             int port = getServerPort();
 
-            Server server = new Server(port);
+            ServerSocket serverSocket = new ServerSocket(port);
 
-            server.startServer();
+            for(;;){
+                Socket socket = serverSocket.accept();
+
+                System.out.println(socket.getInetAddress() + " connected to server!");
+
+                ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
+                Object obj = objInputStream.readObject();
+                System.out.println(obj.toString());
+
+                socket.close();
+            }
         }
     }
 
