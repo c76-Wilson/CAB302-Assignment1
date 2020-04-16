@@ -3,6 +3,7 @@ package ControlPanel;
 import javax.swing.*;
 
 public class Panel {
+    private JForm panel;
     private JLabel mainViewer;
     private JPanel panelMain;
     private JLabel firstSchedule;
