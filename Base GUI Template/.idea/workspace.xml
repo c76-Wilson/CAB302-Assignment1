@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="93789237-4082-4bd7-a0e7-8755c4578839" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1ZkoDLG9fJb28z049bQqopm3m7I" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Downloads/lec06-gui" />
+  </component>
+  <component name="RunManager">
+    <configuration name="Billboard_Viewer" type="Application" factoryName="Application" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Billboard_Viewer" />
+      <module name="Base GUI Template" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="93789237-4082-4bd7-a0e7-8755c4578839" name="Default Changelist" comment="" />
+      <created>1585392331477</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1585392331477</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="734" y="374" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1585883578022">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="734" y="374" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1585883578022" />
+    <state x="734" y="374" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585822836475" />
+    <state x="-735" y="672" key="#com.intellij.ide.util.MemberChooser" timestamp="1586054065996">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state x="-735" y="672" key="#com.intellij.ide.util.MemberChooser/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586054065996" />
+    <state x="1781" y="799" key="#com.intellij.ide.util.TreeFileChooserDialog" timestamp="1585628088282">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="1781" y="799" key="#com.intellij.ide.util.TreeFileChooserDialog/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1585628088282" />
+    <state x="1781" y="799" key="#com.intellij.ide.util.TreeFileChooserDialog/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585465333256" />
+    <state x="1061" y="507" key="#com.intellij.uiDesigner.palette.ComponentItemDialog" timestamp="1585464584866">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="1061" y="507" key="#com.intellij.uiDesigner.palette.ComponentItemDialog/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585464584866" />
+    <state x="1060" y="474" key="FileChooserDialogImpl" timestamp="1585822735836">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="1060" y="474" key="FileChooserDialogImpl/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585822735836" />
+    <state width="1031" height="169" key="GridCell.Tab.0.bottom" timestamp="1586093216420">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state width="1031" height="169" key="GridCell.Tab.0.bottom/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093216420" />
+    <state width="2517" height="573" key="GridCell.Tab.0.bottom/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1586066919613" />
+    <state width="2500" height="413" key="GridCell.Tab.0.bottom/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585465440955" />
+    <state width="1031" height="169" key="GridCell.Tab.0.center" timestamp="1586093216420">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state width="1031" height="169" key="GridCell.Tab.0.center/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093216420" />
+    <state width="2517" height="573" key="GridCell.Tab.0.center/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1586066919613" />
+    <state width="2500" height="413" key="GridCell.Tab.0.center/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585465440955" />
+    <state width="1031" height="169" key="GridCell.Tab.0.left" timestamp="1586093216420">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state width="1031" height="169" key="GridCell.Tab.0.left/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093216420" />
+    <state width="2517" height="573" key="GridCell.Tab.0.left/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1586066919613" />
+    <state width="2500" height="413" key="GridCell.Tab.0.left/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585465440955" />
+    <state width="1031" height="169" key="GridCell.Tab.0.right" timestamp="1586093216420">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state width="1031" height="169" key="GridCell.Tab.0.right/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093216420" />
+    <state width="2517" height="573" key="GridCell.Tab.0.right/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1586066919613" />
+    <state width="2500" height="413" key="GridCell.Tab.0.right/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585465440955" />
+    <state width="1031" height="696" key="GridCell.Tab.1.bottom" timestamp="1586093156592">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state width="1031" height="696" key="GridCell.Tab.1.bottom/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093156592" />
+    <state width="2517" height="508" key="GridCell.Tab.1.bottom/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1585626971638" />
+    <state width="1031" height="696" key="GridCell.Tab.1.center" timestamp="1586093156592">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state width="1031" height="696" key="GridCell.Tab.1.center/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093156592" />
+    <state width="2517" height="508" key="GridCell.Tab.1.center/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1585626971638" />
+    <state width="1031" height="696" key="GridCell.Tab.1.left" timestamp="1586093156592">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state width="1031" height="696" key="GridCell.Tab.1.left/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093156592" />
+    <state width="2517" height="508" key="GridCell.Tab.1.left/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1585626971638" />
+    <state width="1031" height="696" key="GridCell.Tab.1.right" timestamp="1586093156592">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state width="1031" height="696" key="GridCell.Tab.1.right/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093156592" />
+    <state width="2517" height="508" key="GridCell.Tab.1.right/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1585626971638" />
+    <state x="976" y="543" key="com.intellij.ide.util.TipDialog" timestamp="1586259077592">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="976" y="543" key="com.intellij.ide.util.TipDialog/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1586259077592" />
+    <state x="976" y="543" key="com.intellij.ide.util.TipDialog/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585818151978" />
+    <state x="731" y="341" key="new project wizard" timestamp="1585882156066">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="731" y="341" key="new project wizard/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1585882156066" />
+    <state x="1794" y="628" key="refactoring.ChangeSignatureDialog" timestamp="1585465318595">
+      <screen x="0" y="0" width="2560" height="1440" />
+    </state>
+    <state x="1794" y="628" key="refactoring.ChangeSignatureDialog/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585465318595" />
+    <state x="-884" y="462" key="run.anything.popup" timestamp="1586093213180">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state x="-884" y="462" key="run.anything.popup/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586093213180" />
+    <state x="-682" y="436" width="672" height="904" key="search.everywhere.popup" timestamp="1586066891942">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state x="-682" y="436" width="672" height="904" key="search.everywhere.popup/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1586066891942" />
+    <state x="943" y="325" width="672" height="678" key="search.everywhere.popup/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1585632962008" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="messageLabel.getPreferredSize().getWidth()" language="JAVA" />
+        <watch expression="messageLabel.getPreferredSize().getHeight()" language="JAVA" />
+        <watch expression="screenSize.height" language="JAVA" />
+        <watch expression="screenSize.height/3" language="JAVA" />
+        <watch expression="informationLabel.getPreferredSize().getHeight()" language="JAVA" />
+        <watch expression="HEIGHT/3" language="JAVA" />
+        <watch expression="tmp_height" language="JAVA" />
+        <watch expression="informationLabel.getHeight()" language="JAVA" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>
