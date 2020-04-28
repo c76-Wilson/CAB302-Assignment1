@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.sql.*;
 import java.util.*;
 
-public class SetupServer {
+public class Server {
     public static void main(String args[]){
         try {
             runServer();
@@ -50,7 +50,7 @@ public class SetupServer {
 
             String propFileName = "db.props";
 
-            InputStream inputStream = SetupServer.class.getResourceAsStream(propFileName);
+            InputStream inputStream = Server.class.getResourceAsStream(propFileName);
 
             if (inputStream != null) {
                 properties.load(inputStream);
@@ -73,7 +73,7 @@ public class SetupServer {
 
             String propFileName = "server.props";
 
-            InputStream inputStream = SetupServer.class.getResourceAsStream(propFileName);
+            InputStream inputStream = Server.class.getResourceAsStream(propFileName);
 
             if (inputStream != null) {
                 properties.load(inputStream);
