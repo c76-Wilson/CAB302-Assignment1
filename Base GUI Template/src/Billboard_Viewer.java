@@ -1,12 +1,15 @@
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import java.net.Socket;
+import java.util.Base64;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import javax.swing.border.Border;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,7 +22,7 @@ public class Billboard_Viewer extends JFrame implements Runnable {
     private JPanel msg_panel;
     private JPanel info_panel;
 
-    //components to diplay the information for the billboard
+    //components to display the information for the billboard
     private JLabel messageLabel;
     private JTextArea informationLocked;
     private JLabel imagePanel;
@@ -27,6 +30,8 @@ public class Billboard_Viewer extends JFrame implements Runnable {
     //testing vars
     Color panelColor = Color.BLACK;
     int num_panels = 0;
+    boolean pic_created,msg_created,info_created;
+    boolean server_error_g = false;
 
 
     //window variables
@@ -34,22 +39,23 @@ public class Billboard_Viewer extends JFrame implements Runnable {
     private int WIDTH = screenSize.width;
     private int HEIGHT = screenSize.height;
     Dimension window = new Dimension(WIDTH,HEIGHT);
-    
 
-    public Billboard_Viewer(String name) throws IOException {
+
+    public Billboard_Viewer(String name,boolean server_error) throws IOException {
         //set title
         super(name);
-
-        run();
-
+        if(!server_error) run();
+        else server_error_g = true;run();
 
 
     }
 
+
+
     //method to create the GUI window and add the elements to it
     private void createGUI() throws IOException, ParserConfigurationException, SAXException {
         //uncomment to make GUI borderless
-        this.setUndecorated(true);
+        setUndecorated(true);
 
         //set size to the width and height of the primary display
         setPreferredSize(window);
@@ -69,6 +75,7 @@ public class Billboard_Viewer extends JFrame implements Runnable {
 
         //code for testing purposes
         getContentPane().add(mainPanel);
+
 
         //parse control file and ascertain information to display
         parseControlFile("control.xml");
@@ -224,7 +231,7 @@ public class Billboard_Viewer extends JFrame implements Runnable {
         if(info!=null){num_panels++;}
 
         //if picture in control file, test for input source and set variables
-        if(pic!= null)
+        if(pic != null)
         {
             NamedNodeMap attribute_select = pic.getAttributes();
             Attr data_source = (Attr) attribute_select.item(0);
@@ -240,11 +247,13 @@ public class Billboard_Viewer extends JFrame implements Runnable {
                 String source = data_source.getValue();
                 createImageLocal(source);
             }
+
+            pic_created = true;
         }
 
 
 
-        if(msg != null){
+        if(msg!= null){
             //get text value of msg node
             String text = msg.getTextContent();
             //get any attributes relevant to msg
@@ -257,7 +266,7 @@ public class Billboard_Viewer extends JFrame implements Runnable {
                 Color text_color = Color.decode(str_color_code);
                 createMsgLabel(text,text_color);
             }
-
+            msg_created = true;
 
 
         }
@@ -266,7 +275,16 @@ public class Billboard_Viewer extends JFrame implements Runnable {
             //get text value of msg node
             String text = info.getTextContent();
             //get any attributes relevant to msg
-            NamedNodeMap attribute_select = info.getAttributes();
+            NamedNodeMap attribute_select = null;
+            try
+            {
+                attribute_select = info.getAttributes();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
             if(attribute_select.getLength()>0)
             {
                 //select color attribute and then instantiate msg panel with that color
@@ -275,6 +293,11 @@ public class Billboard_Viewer extends JFrame implements Runnable {
                 Color text_color = Color.decode(str_color_code);
                 createInfoLabel(text,text_color);
             }
+            else
+                {
+                    createInfoLabel(text,Color.WHITE);
+                }
+            info_created = true;
         }
 
 
@@ -294,19 +317,31 @@ public class Billboard_Viewer extends JFrame implements Runnable {
         int scaled_h = bounds.height;
 
         //check if need to scale width to fit constraints
-        if (old_w > scaled_w) {
-            new_w = scaled_w;
-            //maintain aspect ratio
-            new_h = (new_w * old_h) / old_w;
+        while(true)
+        {
+            if (new_w > scaled_w) {
+                new_w = scaled_w - (scaled_w/4);
+                //maintain aspect ratio
+                new_h = (new_w * old_h) / old_w;
+                break;
+            }
+
+
+            //check if need to scale width to fit constraints
+            if (new_h > scaled_h) {
+
+                new_h = scaled_h- (scaled_h/4);
+                //maintain aspect ratio
+                new_w = (new_h * old_w) / old_h;
+                break;
+            }
+            else
+            {
+                new_h++;
+            }
+
         }
 
-        //check if need to scale width to fit constraints
-        if (new_h > scaled_h) {
-
-            new_h = scaled_h;
-            //maintain aspect ratio
-            new_w = (new_h * old_w) / old_h;
-        }
         return new Dimension(new_w,new_h);
     }
 
@@ -318,13 +353,15 @@ public class Billboard_Viewer extends JFrame implements Runnable {
 
 
     //pull image from local project and instantiate onto a JLabel
-    private void createImageLocal(String pathname) throws IOException
+    private void createImageLocal(String base_image) throws IOException
     {
         Dimension bounds = new Dimension(WIDTH,HEIGHT/num_panels);
         imagePanel = new JLabel();
         imagePanel.setPreferredSize(bounds);
 
-        BufferedImage img = ImageIO.read(new File(pathname));
+        byte[] buffImage = Base64.getDecoder().decode(base_image);
+
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(buffImage));
         Dimension img_dimen = getScaledImage(img,bounds);
 
         Image temp_img = img.getScaledInstance((int)img_dimen.getWidth(),
@@ -334,6 +371,7 @@ public class Billboard_Viewer extends JFrame implements Runnable {
         ImageIcon icon = new ImageIcon(temp_img);
 
         imagePanel.setIcon(icon);
+
     }
 
 
@@ -362,47 +400,68 @@ public class Billboard_Viewer extends JFrame implements Runnable {
     //stage 2: make component selection dynamic with params
     private void layoutPanels()
     {
-        Dimension panel_dimensions = new Dimension(WIDTH,(int)window.getHeight()/num_panels);
+        //init dimension vars
+        Dimension pic_size,msg_size,info_size;
+        pic_size = msg_size = info_size = null;
 
-        //set the size of the panels
-        msg_panel.setPreferredSize(panel_dimensions);
-        info_panel.setPreferredSize(panel_dimensions);
-        img_panel.setPreferredSize(panel_dimensions);
+        if(pic_created&&msg_created&&info_created) {
+            Dimension x = new Dimension(WIDTH,(int)window.getHeight()/num_panels);
+            pic_size=msg_size=info_size = x;
+        }
+        else if((pic_created&&info_created)&!msg_created){
+            pic_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/3)*2);
+            info_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/3));
+        }
+        else if((msg_created&&info_created)&!pic_created){
+            pic_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/3)*2);
+            info_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/3));
+        }
 
 
-        img_panel.add(imagePanel);
-        info_panel.add(informationLocked);
-        msg_panel.add(messageLabel);
 
 
-        mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
-        img_panel.setLayout(new BoxLayout(img_panel,BoxLayout.Y_AXIS));
-        img_panel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        img_panel.setAlignmentY(Component.CENTER_ALIGNMENT);
-        info_panel.setLayout(new BoxLayout(info_panel,BoxLayout.Y_AXIS));
-        info_panel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        info_panel.setAlignmentY(Component.CENTER_ALIGNMENT);
-        msg_panel.setLayout(new BoxLayout(msg_panel,BoxLayout.Y_AXIS));
-        msg_panel.setAlignmentY(Component.CENTER_ALIGNMENT);
-        msg_panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
+            //set the size of the panels
+            if(msg_created)
+            {
+                msg_panel.setPreferredSize(msg_size);
+                msg_panel.add(messageLabel);
+                msg_panel.setLayout(new BoxLayout(msg_panel,BoxLayout.Y_AXIS));
+                msg_panel.setAlignmentY(Component.CENTER_ALIGNMENT);
+                msg_panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                mainPanel.add(msg_panel);
 
-        mainPanel.add(msg_panel);
-        mainPanel.add(img_panel);
-        mainPanel.add(info_panel);
+            }
+            if(pic_created)
+            {
+                img_panel.setPreferredSize(pic_size);
+                img_panel.add(imagePanel);
+                img_panel.setLayout(new BoxLayout(img_panel,BoxLayout.Y_AXIS));
+                mainPanel.add(Box.createVerticalGlue());
+                mainPanel.add(img_panel);
+                img_panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                img_panel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+
+
+            }
+            if(info_created) {
+                info_panel.setPreferredSize(info_size);
+                info_panel.add(informationLocked);
+                info_panel.setLayout(new BoxLayout(info_panel, BoxLayout.Y_AXIS));
+                info_panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                info_panel.setAlignmentY(Component.CENTER_ALIGNMENT);
+                mainPanel.add(info_panel);
+
+            }
 
         pack();
-
-
 
 
 
     }
 
 
-
-
-
-
+    
     @Override
     public void run() {
         try {
@@ -417,11 +476,50 @@ public class Billboard_Viewer extends JFrame implements Runnable {
     }
 
 
-    public static void main(String[] args) throws IOException {
 
-        JFrame x = new Billboard_Viewer("Test");
+    private void addComponent(Component component,GridBagLayout layout,GridBagConstraints layoutConstraints, int row,
+                              int column, int width, int height) {
+        layoutConstraints.gridx = column;
+        layoutConstraints.gridy = row;
+        layoutConstraints.gridwidth = width;
+        layoutConstraints.gridheight = height;
+        layout.setConstraints(component, layoutConstraints);
+        mainPanel.add(component,layoutConstraints);
+    }
+
+
+
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+
+        boolean is_billboard = false;
+
+        while(true)
+        {
+            try{ is_billboard = serverRetreival(); }
+            catch(IOException e) { e.printStackTrace();}
+
+            if(is_billboard)
+            {
+                JFrame x = new Billboard_Viewer("Test",false);
+            }
+            else{
+                JFrame x = new Billboard_Viewer("Test",true);
+            }
+        }
 
     }
+
+
+    public static boolean serverRetreival() throws IOException, ClassNotFoundException {
+        Socket socket = new Socket("localhost",12345);
+        ObjectInputStream test_stream = new ObjectInputStream(socket.getInputStream());
+        String xml = test_stream.readUTF();
+         return true;
+
+
+    }
+
 }
 
 
