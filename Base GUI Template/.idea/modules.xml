@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Base GUI Template.iml" filepath="$PROJECT_DIR$/Base GUI Template.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Billboard/Billboard.iml" filepath="$PROJECT_DIR$/../Billboard/Billboard.iml" />
     </modules>
   </component>
 </project>

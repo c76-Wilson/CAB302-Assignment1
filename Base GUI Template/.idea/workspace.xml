@@ -22,8 +22,8 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Artifacts" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Billboard" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
@@ -69,10 +69,10 @@
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
     <state x="1061" y="507" key="#com.intellij.uiDesigner.palette.ComponentItemDialog/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585464584866" />
-    <state x="1060" y="474" key="FileChooserDialogImpl" timestamp="1587990857693">
-      <screen x="0" y="0" width="2560" height="1440" />
+    <state x="-633" y="635" key="FileChooserDialogImpl" timestamp="1589020542875">
+      <screen x="-1080" y="3" width="1080" height="1920" />
     </state>
-    <state x="-633" y="635" key="FileChooserDialogImpl/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1587891602552" />
+    <state x="-633" y="635" key="FileChooserDialogImpl/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1589020542875" />
     <state x="1060" y="474" key="FileChooserDialogImpl/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1587990857693" />
     <state x="1060" y="474" key="FileChooserDialogImpl/0.0.2560.1440/-1080.0.1080.1920@0.0.2560.1440" timestamp="1585822735836" />
     <state width="1037" height="691" key="GridCell.Tab.0.bottom" timestamp="1589016432957">
@@ -131,9 +131,14 @@
     <state width="1037" height="507" key="GridCell.Tab.1.right/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1587988825653" />
     <state width="2517" height="366" key="GridCell.Tab.1.right/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1588575984864" />
     <state width="1237" height="220" key="GridCell.Tab.1.right/0.0.1280.720@0.0.1280.720" timestamp="1587609184995" />
-    <state x="782" y="363" key="SettingsEditor" timestamp="1587522702038">
-      <screen x="0" y="0" width="2560" height="1440" />
+    <state x="-855" y="611" key="NewModule_or_Project.wizard" timestamp="1589020565544">
+      <screen x="-1080" y="3" width="1080" height="1920" />
     </state>
+    <state x="-855" y="611" key="NewModule_or_Project.wizard/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1589020565544" />
+    <state x="-1040" y="487" key="SettingsEditor" timestamp="1589020570875">
+      <screen x="-1080" y="3" width="1080" height="1920" />
+    </state>
+    <state x="-1040" y="487" key="SettingsEditor/-1080.3.1080.1920/0.0.2560.1440@-1080.3.1080.1920" timestamp="1589020570875" />
     <state x="782" y="363" key="SettingsEditor/-1080.3.1080.1920/0.0.2560.1440@0.0.2560.1440" timestamp="1587522702038" />
     <state x="976" y="543" key="com.intellij.ide.util.TipDialog" timestamp="1588992213066">
       <screen x="0" y="0" width="2560" height="1440" />
