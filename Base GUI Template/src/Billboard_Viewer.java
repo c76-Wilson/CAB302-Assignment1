@@ -15,6 +15,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.URL;
 
+import
+
 public class Billboard_Viewer extends JFrame implements Runnable {
     //panels to hold the components in the jframe
     private JPanel mainPanel;
