@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<billboard background="#0000FF">
+ <message colour="#FFFF00">Welcome to the ____ Corporation's Annual
+Fundraiser!</message>
+<information> testing</information>
+ <picture url="https://i.pinimg.com/originals/44/ec/bc/44ecbc0a57cff72dd42c3663948c33c2.jpg" />
+
+ 
+</billboard>
