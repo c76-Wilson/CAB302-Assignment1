@@ -1,3 +1,5 @@
+package BillboardViewer;
+
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -80,7 +82,7 @@ public class Billboard_Viewer extends JFrame implements Runnable {
 
 
         //parse control file and ascertain information to display
-        parseControlFile("control.xml");
+        parseControlFile("src\\BillboardViewer\\control.xml");
 
 
 
