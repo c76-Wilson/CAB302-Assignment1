@@ -16,6 +16,13 @@ public class Client {
             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
             output.writeObject(request);
+
+            ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+            Object obj = clientInputStream.readObject();
+
+            if (obj.getClass() == String.class){
+                System.out.println((String)obj);
+            }
         } catch (Exception e) {
             System.out.println(e);
         }
