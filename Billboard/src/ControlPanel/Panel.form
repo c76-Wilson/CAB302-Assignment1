@@ -263,7 +263,6 @@
         <properties>
           <background color="-2302756"/>
           <foreground color="-13487566"/>
-          <icon value="Images/CAB320_Billboard_ERROR.jpg"/>
           <text value="Label Yes"/>
         </properties>
       </component>
