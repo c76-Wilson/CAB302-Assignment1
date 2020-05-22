@@ -4,7 +4,7 @@ import jdk.jfr.Timespan;
 
 import java.sql.Date;
 
-public class ScheduleBillboardRequest extends Request {
+public class RemoveFromScheduleRequest extends Request{
     //region Billboard Name
     private String billboardName;
 
@@ -27,18 +27,6 @@ public class ScheduleBillboardRequest extends Request {
     }
     //endregion
 
-    //region Duration
-    private Timespan duration;
-
-    public Timespan getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Timespan duration) {
-        this.duration = duration;
-    }
-    //endregion
-
     //region Session Token
     private String sessionToken;
 
@@ -51,10 +39,9 @@ public class ScheduleBillboardRequest extends Request {
     }
     //endregion
 
-    public ScheduleBillboardRequest(String billboardName, Date scheduleTime, Timespan duration, String sessionToken) {
+    public RemoveFromScheduleRequest(String billboardName, Date scheduleTime, String sessionToken) {
         this.setBillboardName(billboardName);
         this.setScheduleTime(scheduleTime);
-        this.setDuration(duration);
         this.setSessionToken(sessionToken);
     }
 }
