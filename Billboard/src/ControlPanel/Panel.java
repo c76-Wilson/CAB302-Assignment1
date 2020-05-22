@@ -33,7 +33,6 @@ public class Panel {
                 testFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 testFrame.setVisible(true);
             }
-
         });
     }
 }
