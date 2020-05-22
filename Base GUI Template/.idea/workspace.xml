@@ -170,7 +170,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/Billboard_Viewer.java</url>
-          <line>384</line>
+          <line>386</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

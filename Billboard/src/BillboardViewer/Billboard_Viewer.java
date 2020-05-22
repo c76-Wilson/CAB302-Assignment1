@@ -1,3 +1,5 @@
+package BillboardViewer;
+
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -14,6 +16,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.URL;
+
+
 
 public class Billboard_Viewer extends JFrame implements Runnable {
     //panels to hold the components in the jframe
@@ -78,7 +82,7 @@ public class Billboard_Viewer extends JFrame implements Runnable {
 
 
         //parse control file and ascertain information to display
-        parseControlFile("control.xml");
+        parseControlFile("src\\BillboardViewer\\control.xml");
 
 
 
@@ -490,23 +494,29 @@ public class Billboard_Viewer extends JFrame implements Runnable {
 
 
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
         boolean is_billboard = false;
+        try{ is_billboard = serverRetreival(); }
+        catch(IOException e) { e.printStackTrace();}
 
         while(true)
         {
-            try{ is_billboard = serverRetreival(); }
-            catch(IOException e) { e.printStackTrace();}
-
             if(is_billboard)
             {
+                try{ is_billboard = serverRetreival(); }
+                catch(IOException e) { e.printStackTrace();}
                 JFrame x = new Billboard_Viewer("Test",false);
+                if(!is_billboard){x.dispose();}
             }
             else{
-                JFrame x = new Billboard_Viewer("Test",true);
+                JFrame x = new Billboard_Viewer("Test",false);
+                if(!is_billboard){x.dispose();}
             }
+            Thread.sleep(15000);
         }
+
+
 
     }
 
