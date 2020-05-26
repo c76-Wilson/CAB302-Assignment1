@@ -1,8 +1,10 @@
 package BillboardServer;
 
+import Helper.Password;
 import Helper.Requests.CurrentBillboardRequest;
 import Helper.Requests.LoginRequest;
 import Helper.Requests.Request;
+import Helper.Responses.ErrorMessage;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -14,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -108,12 +111,11 @@ public class Server {
     }
 
     public static Object evaluateRequest(Request request, Connection con) throws Exception {
+        // If current billboard request
         if (request.getClass() == CurrentBillboardRequest.class){
             Statement statement = con.createStatement();
 
-            String s = String.format("SELECT * FROM schedules WHERE StartTime <= \"%s\" AND (StartTime + Duration) >= \"%s\" ORDER BY ID DESC LIMIT 1", LocalDateTime.now(), LocalDateTime.now());
-
-            ResultSet scheduleResult = statement.executeQuery(s);
+            ResultSet scheduleResult = statement.executeQuery(String.format("SELECT * FROM schedules WHERE StartTime <= \"%s\" AND (StartTime + Duration) >= \"%s\" ORDER BY ID DESC LIMIT 1", LocalDateTime.now(), LocalDateTime.now()));
 
             if (scheduleResult.next()){
                 ResultSet billboardResult = statement.executeQuery(String.format("SELECT XML FROM billboards WHERE ScheduleID = %d LIMIT 1", scheduleResult.getInt("ID")));
@@ -131,10 +133,35 @@ public class Server {
                 return contents;
             }
         }
+        // If login request
         else if (request.getClass() == LoginRequest.class){
+            // make SQL query to get user for a given name
             LoginRequest loginRequest = (LoginRequest)request;
 
+            Statement statement = con.createStatement();
 
+            ResultSet userResult = statement.executeQuery(String.format("SELECT Password FROM users WHERE Name = \"%s\" LIMIT 1", loginRequest.getUserName()));
+
+            // If user exists, check password
+            if (userResult.next()){
+                if (Password.authenticatePassword(loginRequest.getHashedPassword(), userResult.getString("Password"))){
+                    // If password is correct, return session token and store in DB
+                    // Generate session token
+                    byte[] randomBytes = new byte[24];
+                    new SecureRandom().nextBytes(randomBytes);
+                    String sessionToken = Base64.getUrlEncoder().encodeToString(randomBytes);
+
+                    System.out.println(sessionToken);
+
+                    statement.executeQuery(String.format("UPDATE users SET SessionToken = \"%s\" WHERE Name = \"%s\"", sessionToken, loginRequest.getUserName()));
+
+                    return sessionToken;
+                }
+            }
+            // Else return error
+            else{
+                return new ErrorMessage("Incorrect username!");
+            }
         }
         return null;
     }
