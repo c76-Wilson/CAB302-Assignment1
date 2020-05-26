@@ -97,36 +97,26 @@ public class ControlFrame implements ActionListener {
     private void setupButton(){
         submit = new JButton("Login");
         submit.addActionListener(this);
-        String UN = username.getText();
-        String PW = new String(password.getPassword());
-        try {
-            submit.setActionCommand(testLogin(UN, PW));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 1;
         grid.gridy = 2;
         panel.add(submit, grid);
     }
 
-    private String testLogin(String user, String pass) throws Exception{
-        Password before = new Password();
-        String hashed = before.hash(pass);
+    private boolean testLogin(String user, String pass) throws Exception{
+        String hashed = Password.hash(pass);
         LoginRequest login = new LoginRequest(user, hashed);
-        Socket socket = new Socket("127.0.0.1", 4444);
+        Socket socket = new Socket("127.0.0.1", 3306);
         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
         output.writeObject(login);
         ObjectInputStream clientInput = new ObjectInputStream(socket.getInputStream());
         Object obj = clientInput.readObject();
         if(obj.getClass() == String.class){
             storeSessionToken((String) obj);
-            return "Login True";
-        } else if (obj.getClass() == ErrorMessage.class){
-            System.out.println(((ErrorMessage) obj).getErrorMessage());
-            return "Login False";
+            return true;
         } else {
-            return "Couldn't find element";
+            System.out.println(((ErrorMessage) obj).getErrorMessage());
+            return false;
         }
     }
 
@@ -138,10 +128,15 @@ public class ControlFrame implements ActionListener {
     public void actionPerformed(ActionEvent event){
         String user = username.getText();
         String pass = new String(password.getPassword());
+        boolean loginPass = false;
+        try {
+            loginPass = testLogin(user, pass);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println(user);
         System.out.println(pass);
-        String cmd = event.getActionCommand();
-        if (cmd == "Login True") {
+        if (loginPass == true) {
             username = null;
             password = null;
             passLabel = null;
@@ -149,11 +144,8 @@ public class ControlFrame implements ActionListener {
             panel = null;
             frame.dispose();
             new ControlFrame("Process Form", true);
-        } else if (cmd == "Login False") {
+        } else if (loginPass == false) {
             failedLogin = new JLabel("Incorrect Username or Password");
-            panel.add(failedLogin);
-        } else if (cmd == "Couldn't find element"){
-            failedLogin = new JLabel("Check your Username / Password aren't null");
             panel.add(failedLogin);
         } else {
             failedLogin = new JLabel("Check the code Code Monkeys");
