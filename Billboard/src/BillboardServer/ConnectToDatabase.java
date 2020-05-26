@@ -1,12 +1,8 @@
 package BillboardServer;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
+import Helper.Password;
+
 import java.sql.*;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.SecureRandom;
 
 public class ConnectToDatabase {
     public static Connection connect(String url, String schema, String username, String password){
@@ -66,7 +62,7 @@ public class ConnectToDatabase {
                     boolean test = Password.check(pass, hashedPass);
 
                     Statement createSuperUser = con.createStatement();
-                    createSuperUser.executeQuery("INSERT INTO users (Name, Password, Permissions) VALUES('admin', '" + hashedPass + ", 'Create Billboard,Edit Billboard,Schedule Billboard,Edit Users,Administrator')");
+                    createSuperUser.executeQuery("INSERT INTO users (Name, Password, Salt, Permissions) VALUES('admin', '" + hashedPass + ", 'Create Billboard,Edit Billboard,Schedule Billboard,Edit Users,Administrator')");
                 }
             }
         }

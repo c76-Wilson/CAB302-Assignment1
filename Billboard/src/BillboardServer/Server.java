@@ -1,6 +1,7 @@
 package BillboardServer;
 
 import Helper.Requests.CurrentBillboardRequest;
+import Helper.Requests.LoginRequest;
 import Helper.Requests.Request;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -129,6 +130,11 @@ public class Server {
 
                 return contents;
             }
+        }
+        else if (request.getClass() == LoginRequest.class){
+            LoginRequest loginRequest = (LoginRequest)request;
+
+
         }
         return null;
     }
