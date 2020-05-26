@@ -1,7 +1,7 @@
 package Helper.Requests;
 
 //DeleteBillboardRequest submits a token and billboard name, and the server deletes that billboard.
-public class DeleteBillboardRequest {
+public class DeleteBillboardRequest extends Request{
     //region Session Token
     private String sessionToken;
 

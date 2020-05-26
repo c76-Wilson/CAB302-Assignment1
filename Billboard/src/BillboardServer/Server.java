@@ -1,10 +1,9 @@
 package BillboardServer;
 
 import Helper.Password;
-import Helper.Requests.CurrentBillboardRequest;
-import Helper.Requests.LoginRequest;
-import Helper.Requests.Request;
+import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
+import Helper.UserPermissions;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -113,57 +112,47 @@ public class Server {
     public static Object evaluateRequest(Request request, Connection con) throws Exception {
         // If current billboard request
         if (request.getClass() == CurrentBillboardRequest.class){
-            Statement statement = con.createStatement();
-
-            ResultSet scheduleResult = statement.executeQuery(String.format("SELECT * FROM schedules WHERE StartTime <= \"%s\" AND (StartTime + Duration) >= \"%s\" ORDER BY ID DESC LIMIT 1", LocalDateTime.now(), LocalDateTime.now()));
-
-            if (scheduleResult.next()){
-                ResultSet billboardResult = statement.executeQuery(String.format("SELECT XML FROM billboards WHERE ScheduleID = %d LIMIT 1", scheduleResult.getInt("ID")));
-
-                if (billboardResult.next()){
-                    return billboardResult.getString("XML");
-                }
-                else{
-                    throw new Exception("Could not find billboard for this schedule!");
-                }
-            }
-            else{
-                String contents = new String(Files.readAllBytes(Paths.get("src\\BillboardServer\\error.xml")));
-
-                return contents;
-            }
+            Evaluate.EvaluateCurrentBillboard(con);
         }
         // If login request
         else if (request.getClass() == LoginRequest.class){
-            // make SQL query to get user for a given name
-            LoginRequest loginRequest = (LoginRequest)request;
+            Evaluate.EvaluateLogin(con, (LoginRequest)request);
+        }
+        // If list billboards request
+        else if (request.getClass() == ListBillboardsRequest.class){
 
-            Statement statement = con.createStatement();
+        }
+        // If get billboard info request
+        else if (request.getClass() == GetBillboardRequest.class){
 
-            ResultSet userResult = statement.executeQuery(String.format("SELECT Password FROM users WHERE Name = \"%s\" LIMIT 1", loginRequest.getUserName()));
+        }
+        // If create/edit billboard request
+        else if (request.getClass() == CreateEditBillboardRequest.class){
 
-            // If user exists, check password
-            if (userResult.next()){
-                if (Password.authenticatePassword(loginRequest.getHashedPassword(), userResult.getString("Password"))){
-                    // If password is correct, return session token and store in DB
-                    // Generate session token
-                    byte[] randomBytes = new byte[24];
-                    new SecureRandom().nextBytes(randomBytes);
-                    String sessionToken = Base64.getUrlEncoder().encodeToString(randomBytes);
+        }
+        // If delete billboard request
+        else if (request.getClass() == DeleteBillboardRequest.class){
 
-                    System.out.println(sessionToken);
+        }
+        // If view schedule request
+        else if (request.getClass() == ViewScheduleRequest.class){
 
-                    statement.executeQuery(String.format("UPDATE users SET SessionToken = \"%s\" WHERE Name = \"%s\"", sessionToken, loginRequest.getUserName()));
-
-                    return sessionToken;
-                }
-            }
-            // Else return error
-            else{
-                return new ErrorMessage("Incorrect username!");
-            }
         }
         return null;
+    }
+
+    public static boolean checkSessionToken(Connection con, String sessionToken) throws Exception{
+        // Create query for session token - return true if session token is valid
+        Statement statement = con.createStatement();
+
+        ResultSet tokenResult = statement.executeQuery(String.format("SELECT * FROM users WHERE SessionToken = \"%s\" AND TokenLastUsed >= \"%s\" LIMIT 1", sessionToken, LocalDateTime.now().minusHours(24)));
+
+        if (tokenResult.next()){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }
 

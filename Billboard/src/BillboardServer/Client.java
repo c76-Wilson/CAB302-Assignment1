@@ -13,7 +13,7 @@ import java.net.Socket;
 public class Client {
     public static void main(String args[]){
         try {
-            LoginRequest request = new LoginRequest("admin", Password.hash("test"));
+            LoginRequest request = new LoginRequest("admin", Password.hash("root"));
             Socket socket = new Socket("127.0.0.1", 4444);
 
             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());

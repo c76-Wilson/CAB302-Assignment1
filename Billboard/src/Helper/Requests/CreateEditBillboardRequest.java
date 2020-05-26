@@ -1,7 +1,7 @@
 package Helper.Requests;
 
 //CreateEditBillboardRequest submits token, billboard name and contents, and creates it if it does not exist, and edits if it does
-public class CreateEditBillboardRequest {
+public class CreateEditBillboardRequest extends Request{
     //region Session Token
     private String sessionToken;
 

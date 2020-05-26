@@ -1,6 +1,6 @@
 package Helper.Requests;
 
-public class ViewScheduleRequest {
+public class ViewScheduleRequest extends Request{
     //region Session Token
     private String sessionToken;
 
