@@ -112,11 +112,11 @@ public class Server {
     public static Object evaluateRequest(Request request, Connection con) throws Exception {
         // If current billboard request
         if (request.getClass() == CurrentBillboardRequest.class){
-            Evaluate.EvaluateCurrentBillboard(con);
+            return Evaluate.EvaluateCurrentBillboard(con);
         }
         // If login request
         else if (request.getClass() == LoginRequest.class){
-            Evaluate.EvaluateLogin(con, (LoginRequest)request);
+            return Evaluate.EvaluateLogin(con, (LoginRequest)request);
         }
         // If list billboards request
         else if (request.getClass() == ListBillboardsRequest.class){
