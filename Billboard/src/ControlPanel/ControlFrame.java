@@ -1,5 +1,7 @@
 package ControlPanel;
+import Helper.Password;
 import Helper.Requests.*;
+import Helper.Responses.ErrorMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,8 +9,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
-public class ControlFrame extends Panel implements ActionListener {
+public class ControlFrame implements ActionListener {
 
     private JFrame frame;
     private JPanel panel;
@@ -19,21 +24,24 @@ public class ControlFrame extends Panel implements ActionListener {
     private JLabel passLabel;
     private JLabel failedLogin;
     private GridBagConstraints grid;
-    private boolean loginComplete = false;
+    private String sessionToken;
 
-    public ControlFrame(String title){
-        frame = new JFrame(title);
-        if(loginComplete == false){
-            frame.setSize(720, 720);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-            setupLoginForm();
-        } else if(loginComplete == true){
+    public ControlFrame(String title, boolean loginTrue){
+        if(loginTrue){
+            frame = new JFrame(title);
             frame.setSize(1280, 720);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
             setupProcessForm();
         }
+    }
+
+    public ControlFrame (String title){
+        frame = new JFrame(title);
+        frame.setSize(720, 720);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        setupLoginForm();
     }
 
     private JPanel setupProcessForm() {
@@ -86,68 +94,70 @@ public class ControlFrame extends Panel implements ActionListener {
         panel.add(password, grid);
     }
 
-    private void setupPlaceholders(){
-        username.requestFocus();
-    }
-
     private void setupButton(){
         submit = new JButton("Login");
         submit.addActionListener(this);
-        submit.setActionCommand(testLogin(username.getText(), password.getPassword().toString()));
+        String UN = username.getText();
+        String PW = new String(password.getPassword());
+        try {
+            submit.setActionCommand(testLogin(UN, PW));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 1;
         grid.gridy = 2;
         panel.add(submit, grid);
     }
 
-    private String testLogin(String user, String pass){
-        //if(Helper.Requests.LoginRequest(user, pass) == true){
-        // return "Login True";
-        // }
-        //else {
-        // return "Login False";
-        // }
-        return "Login True";
-    }
-
-    private void txtUserNameFocusGained(FocusEvent evt) {
-        String userText = username.getText();
-        if(userText.equals("Username")){
-            username.setCaretPosition(0);
-        }
-
-    }
-
-    private void txtUserNameFocusLost(FocusEvent evt) {
-        String userText = username.getText();
-        if(userText.equals("")){
-            username.setForeground(new java.awt.Color(86, 86, 86));
-            username.setCaretPosition(0);
-            username.setText("Username");
+    private String testLogin(String user, String pass) throws Exception{
+        Password before = new Password();
+        String hashed = before.hash(pass);
+        LoginRequest login = new LoginRequest(user, hashed);
+        Socket socket = new Socket("127.0.0.1", 4444);
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+        output.writeObject(login);
+        ObjectInputStream clientInput = new ObjectInputStream(socket.getInputStream());
+        Object obj = clientInput.readObject();
+        if(obj.getClass() == String.class){
+            storeSessionToken((String) obj);
+            return "Login True";
+        } else if (obj.getClass() == ErrorMessage.class){
+            System.out.println(((ErrorMessage) obj).getErrorMessage());
+            return "Login False";
+        } else {
+            return "Couldn't find element";
         }
     }
 
-    private void txtUserNameKeyPressed(KeyEvent evt) {
-        String userText = username.getText();
-        if(userText.equals("Username")){
-            username.setForeground(new java.awt.Color(0, 0, 0));
-            username.setText(null);
-            username.setCaretPosition(0);
-        }
+    private void storeSessionToken(String token) {
+        sessionToken = token;
     }
 
     @Override
-    public void actionPerformed(ActionEvent event) {
+    public void actionPerformed(ActionEvent event){
+        String user = username.getText();
+        String pass = new String(password.getPassword());
+        System.out.println(user);
+        System.out.println(pass);
         String cmd = event.getActionCommand();
         if (cmd == "Login True") {
-            loginComplete = true;
+            username = null;
+            password = null;
+            passLabel = null;
+            userLabel = null;
+            panel = null;
             frame.dispose();
-            new ControlFrame("Process Form");
+            new ControlFrame("Process Form", true);
         } else if (cmd == "Login False") {
-            failedLogin.setText("Incorrect Username or Password");
+            failedLogin = new JLabel("Incorrect Username or Password");
+            panel.add(failedLogin);
+        } else if (cmd == "Couldn't find element"){
+            failedLogin = new JLabel("Check your Username / Password aren't null");
             panel.add(failedLogin);
         } else {
-
+            failedLogin = new JLabel("Check the code Code Monkeys");
+            panel.add(failedLogin);
         }
     }
 }
