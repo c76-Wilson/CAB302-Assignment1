@@ -5,10 +5,7 @@ import Helper.Responses.ErrorMessage;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -25,6 +22,9 @@ public class ControlFrame implements ActionListener {
     private JLabel failedLogin;
     private GridBagConstraints grid;
     private String sessionToken;
+    private JLabel headerLabel;
+    private JLabel statusLabel;
+    private JPanel controlPanel;
 
     public ControlFrame(String title, boolean loginTrue){
         if(loginTrue){
@@ -45,19 +45,14 @@ public class ControlFrame implements ActionListener {
     }
 
     private JPanel setupProcessForm() {
-        setupTest();
+        setupProcess();
         return panel;
     }
 
-    private void setupTest() {
+    private void setupProcess() {
         panel = new JPanel(new GridBagLayout());
         frame.add(panel);
-        JLabel test = new JLabel("Hello Gamers");
-        grid = new GridBagConstraints();
-        grid.fill = GridBagConstraints.VERTICAL;
-        grid.gridx = 5;
-        grid.gridy = 5;
-        panel.add(test, grid);
+        createMenu();
     }
 
     public JPanel setupLoginForm(){
@@ -106,7 +101,7 @@ public class ControlFrame implements ActionListener {
     private boolean testLogin(String user, String pass) throws Exception{
         String hashed = Password.hash(pass);
         LoginRequest login = new LoginRequest(user, hashed);
-        Socket socket = new Socket("127.0.0.1", 3306);
+        Socket socket = new Socket("localhost", 4444);
         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
         output.writeObject(login);
         ObjectInputStream clientInput = new ObjectInputStream(socket.getInputStream());
@@ -122,6 +117,110 @@ public class ControlFrame implements ActionListener {
 
     private void storeSessionToken(String token) {
         sessionToken = token;
+    }
+
+    private void createMenu(){
+        //create a menu bar
+        final JMenuBar menuBar = new JMenuBar();
+
+        //create menus
+        JMenu fileMenu = new JMenu("File");
+        JMenu editMenu = new JMenu("Edit");
+        final JMenu aboutMenu = new JMenu("About");
+        final JMenu linkMenu = new JMenu("Links");
+
+        //create menu items
+        JMenuItem newMenuItem = new JMenuItem("New");
+        newMenuItem.setMnemonic(KeyEvent.VK_N);
+        newMenuItem.setActionCommand("New");
+
+        JMenuItem openMenuItem = new JMenuItem("Open");
+        openMenuItem.setActionCommand("Open");
+
+        JMenuItem saveMenuItem = new JMenuItem("Save");
+        saveMenuItem.setActionCommand("Save");
+
+        JMenuItem exitMenuItem = new JMenuItem("Exit");
+        exitMenuItem.setActionCommand("Exit");
+
+        JMenuItem cutMenuItem = new JMenuItem("Cut");
+        cutMenuItem.setActionCommand("Cut");
+
+        JMenuItem copyMenuItem = new JMenuItem("Copy");
+        copyMenuItem.setActionCommand("Copy");
+
+        JMenuItem pasteMenuItem = new JMenuItem("Paste");
+        pasteMenuItem.setActionCommand("Paste");
+
+        MenuItemListener menuItemListener = new MenuItemListener();
+
+        newMenuItem.addActionListener(menuItemListener);
+        openMenuItem.addActionListener(menuItemListener);
+        saveMenuItem.addActionListener(menuItemListener);
+        exitMenuItem.addActionListener(menuItemListener);
+        cutMenuItem.addActionListener(menuItemListener);
+        copyMenuItem.addActionListener(menuItemListener);
+        pasteMenuItem.addActionListener(menuItemListener);
+
+        final JCheckBoxMenuItem showWindowMenu = new JCheckBoxMenuItem("Show About", true);
+        showWindowMenu.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+
+                if(showWindowMenu.getState()){
+                    menuBar.add(aboutMenu);
+                } else {
+                    menuBar.remove(aboutMenu);
+                }
+            }
+        });
+        final JRadioButtonMenuItem showLinksMenu = new JRadioButtonMenuItem(
+                "Show Links", true);
+        showLinksMenu.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+
+                if(menuBar.getMenu(3)!= null){
+                    menuBar.remove(linkMenu);
+                    frame.repaint();
+                } else {
+                    menuBar.add(linkMenu);
+                    frame.repaint();
+                }
+            }
+        });
+        //add menu items to menus
+        fileMenu.add(newMenuItem);
+        fileMenu.add(openMenuItem);
+        fileMenu.add(saveMenuItem);
+        fileMenu.addSeparator();
+        fileMenu.add(showWindowMenu);
+        fileMenu.addSeparator();
+        fileMenu.add(showLinksMenu);
+        fileMenu.addSeparator();
+        fileMenu.add(exitMenuItem);
+
+        editMenu.add(cutMenuItem);
+        editMenu.add(copyMenuItem);
+        editMenu.add(pasteMenuItem);
+
+        //add menu to menubar
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
+        menuBar.add(aboutMenu);
+        menuBar.add(linkMenu);
+
+        //add menubar to the frame
+        frame.setJMenuBar(menuBar);
+        frame.setVisible(true);
+    }
+
+    class MenuItemListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            if(e.getActionCommand() == "Exit"){
+                frame.dispose();
+            } else {
+                statusLabel.setText(e.getActionCommand() + " JMenuItem clicked.");
+            }
+        }
     }
 
     @Override
@@ -146,9 +245,19 @@ public class ControlFrame implements ActionListener {
             new ControlFrame("Process Form", true);
         } else if (loginPass == false) {
             failedLogin = new JLabel("Incorrect Username or Password");
+            failedLogin.setForeground(Color.RED);
+            grid.fill = GridBagConstraints.VERTICAL;
+            grid.gridx = 1;
+            grid.gridy = 5;
+            failedLogin.setVisible(true);
             panel.add(failedLogin);
         } else {
             failedLogin = new JLabel("Check the code Code Monkeys");
+            grid.fill = GridBagConstraints.VERTICAL;
+            failedLogin.setForeground(Color.RED);
+            grid.gridx = 1;
+            grid.gridy = 5;
+            failedLogin.setVisible(true);
             panel.add(failedLogin);
         }
     }
