@@ -1,6 +1,8 @@
 package Helper.Responses;
 
-public class ErrorMessage {
+import java.io.Serializable;
+
+public class ErrorMessage implements Serializable {
     //region Error Message
     private String errorMessage;
 

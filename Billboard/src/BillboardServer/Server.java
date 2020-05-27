@@ -1,21 +1,9 @@
 package BillboardServer;
 
-import Helper.Password;
 import Helper.Requests.*;
-import Helper.Responses.ErrorMessage;
-import Helper.UserPermissions;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
