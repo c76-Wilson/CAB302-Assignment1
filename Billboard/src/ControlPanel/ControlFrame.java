@@ -4,6 +4,8 @@ import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.ObjectInputStream;
@@ -25,14 +27,17 @@ public class ControlFrame implements ActionListener {
     private JLabel headerLabel;
     private JLabel statusLabel;
     private JPanel controlPanel;
+    private JLabel mainCanvas;
+    private JColorChooser palette;
+    private GridBagConstraints canvasGrid;
 
     public ControlFrame(String title, boolean loginTrue){
         if(loginTrue){
             frame = new JFrame(title);
             frame.setSize(1280, 720);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
             setupProcessForm();
+            frame.setVisible(true);
         }
     }
 
@@ -40,25 +45,51 @@ public class ControlFrame implements ActionListener {
         frame = new JFrame(title);
         frame.setSize(720, 720);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
         setupLoginForm();
+        frame.setVisible(true);
     }
 
-    private JPanel setupProcessForm() {
-        setupProcess();
-        return panel;
-    }
-
-    private void setupProcess() {
+    private void setupProcessForm() {
         panel = new JPanel(new GridBagLayout());
+        grid = new GridBagConstraints();
+        setupMenu();
+        setupCanvas();
+        setupColourPalette();
         frame.add(panel);
+    }
+
+    private void setupCanvas() {
+        mainCanvas = new JLabel("Test");
+        mainCanvas.setForeground(new Color(255, 225, 255));
+        mainCanvas.setMaximumSize(new Dimension(960, 240));
+        grid.fill = GridBagConstraints.VERTICAL;
+        grid.gridx = 1;
+        grid.gridy = 0;
+        panel.add(mainCanvas, grid);
+        mainCanvas.setVisible(true);
+    }
+
+    private void setupColourPalette() {
+        palette = new JColorChooser();
+        palette.getSelectionModel().addChangeListener(e -> {
+            Color colour = palette.getColor();
+            mainCanvas.setForeground(colour);
+        });
+        grid.fill = GridBagConstraints.VERTICAL;
+        grid.gridx = 2;
+        grid.gridy = 0;
+        panel.add(palette, grid);
+        palette.setVisible(true);
+    }
+
+    private void setupMenu() {
+        prepareMenu();
         createMenu();
     }
 
-    public JPanel setupLoginForm(){
+    public void setupLoginForm(){
         setupInputs();
         setupButton();
-        return panel;
     }
 
     private void setupInputs(){
@@ -117,6 +148,25 @@ public class ControlFrame implements ActionListener {
 
     private void storeSessionToken(String token) {
         sessionToken = token;
+    }
+
+    private void prepareMenu(){
+        headerLabel = new JLabel("",JLabel.CENTER );
+        statusLabel = new JLabel("",JLabel.CENTER);
+        statusLabel.setSize(350,100);
+
+        controlPanel = new JPanel();
+        controlPanel.setLayout(new FlowLayout());
+
+        frame.add(headerLabel);
+        frame.add(controlPanel);
+        frame.add(statusLabel);
+
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent windowEvent){
+                System.exit(0);
+            }
+        });
     }
 
     private void createMenu(){
@@ -233,8 +283,6 @@ public class ControlFrame implements ActionListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(user);
-        System.out.println(pass);
         if (loginPass == true) {
             username = null;
             password = null;
@@ -242,15 +290,20 @@ public class ControlFrame implements ActionListener {
             userLabel = null;
             panel = null;
             frame.dispose();
-            new ControlFrame("Process Form", true);
+            new ControlFrame("Billboard Control Panel", true);
         } else if (loginPass == false) {
-            failedLogin = new JLabel("Incorrect Username or Password");
-            failedLogin.setForeground(Color.RED);
-            grid.fill = GridBagConstraints.VERTICAL;
-            grid.gridx = 1;
-            grid.gridy = 5;
-            failedLogin.setVisible(true);
-            panel.add(failedLogin);
+            if(failedLogin == null){
+                failedLogin = new JLabel("Incorrect Username or Password");
+                failedLogin.setForeground(Color.RED);
+                grid.fill = GridBagConstraints.VERTICAL;
+                grid.gridx = 1;
+                grid.gridy = 3;
+                failedLogin.setVisible(true);
+                panel.add(failedLogin, grid);
+                frame.revalidate();
+            } else {
+
+            }
         } else {
             failedLogin = new JLabel("Check the code Code Monkeys");
             grid.fill = GridBagConstraints.VERTICAL;
@@ -259,6 +312,7 @@ public class ControlFrame implements ActionListener {
             grid.gridy = 5;
             failedLogin.setVisible(true);
             panel.add(failedLogin);
+            frame.revalidate();
         }
     }
 }
