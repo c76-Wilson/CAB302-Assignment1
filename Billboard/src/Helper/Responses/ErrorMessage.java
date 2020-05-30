@@ -10,9 +10,7 @@ public class ErrorMessage implements Serializable {
         return errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
+    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
     //endregion
 
     public ErrorMessage(String errorMessage){

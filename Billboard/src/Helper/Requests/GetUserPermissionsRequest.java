@@ -1,9 +1,5 @@
 package Helper.Requests;
 
-import Helper.UserPermissions;
-
-import java.util.EnumSet;
-
 public class GetUserPermissionsRequest extends Request{
     //region User Name
     private String userName;

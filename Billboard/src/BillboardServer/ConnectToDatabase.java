@@ -37,11 +37,21 @@ public class ConnectToDatabase {
         try {
             //Run Create Table If Not Exists Query
             Statement createTables = con.createStatement();
-            createTables.execute("CREATE TABLE IF NOT EXISTS `billboards` (`ID` int(11) NOT NULL,  `Name` varchar(250) NOT NULL,  `XML` text NOT NULL,  `IsDefault` bit(1) NOT NULL DEFAULT b'0',  `CreatorID` int(11) NOT NULL DEFAULT 0,  `ScheduleID` int(11) DEFAULT NULL,  PRIMARY KEY (`ID`));");
-            createTables.execute("CREATE TABLE IF NOT EXISTS `schedules` (`ID` int(11) NOT NULL,  `BillboardID` int(11) NOT NULL,  `StartTime` datetime DEFAULT NULL,  `Duration` time DEFAULT NULL,  `RecurringEvery` time DEFAULT NULL,  `CreatorID` int(11) NOT NULL,  PRIMARY KEY (`ID`));");
-            createTables.execute("CREATE TABLE IF NOT EXISTS `users` (  `ID` int(11) NOT NULL AUTO_INCREMENT,  `Name` varchar(256) NOT NULL,  `Password` varchar(256) NOT NULL, `SessionToken` varchar(64), `TokenLastUsed` datetime, `Permissions` set('Create Billboard','Edit Billboard','Schedule Billboard','Edit Users','Administrator') NOT NULL,  PRIMARY KEY (`ID`));");
-            createTables.execute("ALTER TABLE `billboards` ADD KEY IF NOT EXISTS `Billboard_CreatorID` (`CreatorID`),  ADD KEY IF NOT EXISTS `Billboard_ScheduleID` (`ScheduleID`),  ADD CONSTRAINT `Billboard_CreatorID` FOREIGN KEY IF NOT EXISTS (`CreatorID`) REFERENCES `users` (`ID`),  ADD CONSTRAINT `Billboard_ScheduleID` FOREIGN KEY IF NOT EXISTS (`ScheduleID`) REFERENCES `schedules` (`ID`);");
-            createTables.execute("ALTER TABLE `schedules` ADD KEY IF NOT EXISTS `Schedule_BillboardID` (`BillboardID`),  ADD KEY IF NOT EXISTS `Schedule_CreatorID` (`CreatorID`),  ADD CONSTRAINT `Schedule_BillboardID` FOREIGN KEY IF NOT EXISTS (`BillboardID`) REFERENCES `billboards` (`ID`),  ADD CONSTRAINT `Schedule_CreatorID` FOREIGN KEY IF NOT EXISTS (`CreatorID`) REFERENCES `users` (`ID`);");
+            createTables.execute("CREATE TABLE IF NOT EXISTS `billboards` (`Name` varchar(256) NOT NULL,  `XML` text NOT NULL,  `CreatorName` varchar(256) NOT NULL,  `ScheduleID` int(11) DEFAULT NULL,  PRIMARY KEY (`Name`));");
+            createTables.execute("CREATE TABLE IF NOT EXISTS `schedules` (`ID` int(11) NOT NULL,  `BillboardName` varchar(256) NOT NULL,  `StartTime` datetime NOT NULL, `NextOccurrence` datetime DEFAULT NULL,  `Duration` time NOT NULL,  `RecurringEvery` time DEFAULT NULL,  `CreatorName` varchar(256) NOT NULL,  PRIMARY KEY (`ID`));");
+            createTables.execute("CREATE TABLE IF NOT EXISTS `users` (`Name` varchar(256) NOT NULL,  `Password` varchar(256) NOT NULL,  PRIMARY KEY (`Name`));");
+            createTables.execute("CREATE TABLE IF NOT EXISTS `permissions` (`Name` varchar(256) NOT NULL, PRIMARY KEY (`Name`));");
+
+            // Create permissions if they don't exist
+            ResultSet permissionResults = createTables.executeQuery("SELECT * FROM permissions");
+            if (!permissionResults.next()){
+                createTables.execute("INSERT INTO `permissions` (Name) VALUES('Create Billboard'), ('Edit Billboard'), ('Schedule Billboard'), ('Edit Users');");
+            }
+
+            createTables.execute("CREATE TABLE IF NOT EXISTS `user_permissions` (`UserName` varchar(256) NOT NULL, `PermissionName` varchar(256) NOT NULL);");
+            createTables.execute("ALTER TABLE `user_permissions` ADD KEY IF NOT EXISTS `UserPermission_UserName` (`UserName`), ADD KEY IF NOT EXISTS `UserPermission_PermissionName` (`PermissionName`), ADD CONSTRAINT `UserPermission_UserName` FOREIGN KEY IF NOT EXISTS (`UserName`) REFERENCES `users` (`Name`), ADD CONSTRAINT `UserPermission_PermissionName` FOREIGN KEY IF NOT EXISTS (`PermissionName`) REFERENCES `permissions` (`Name`);");
+            createTables.execute("ALTER TABLE `billboards` ADD KEY IF NOT EXISTS `Billboard_CreatorName` (`CreatorName`),  ADD KEY IF NOT EXISTS `Billboard_ScheduleID` (`ScheduleID`),  ADD CONSTRAINT `Billboard_CreatorName` FOREIGN KEY IF NOT EXISTS (`CreatorName`) REFERENCES `users` (`Name`),  ADD CONSTRAINT `Billboard_ScheduleID` FOREIGN KEY IF NOT EXISTS (`ScheduleID`) REFERENCES `schedules` (`ID`);");
+            createTables.execute("ALTER TABLE `schedules` ADD KEY IF NOT EXISTS `Schedule_BillboardName` (`BillboardName`),  ADD KEY IF NOT EXISTS `Schedule_CreatorName` (`CreatorName`),  ADD CONSTRAINT `Schedule_BillboardName` FOREIGN KEY IF NOT EXISTS (`BillboardName`) REFERENCES `billboards` (`Name`),  ADD CONSTRAINT `Schedule_CreatorName` FOREIGN KEY IF NOT EXISTS (`CreatorName`) REFERENCES `users` (`Name`);");
 
         } catch (Exception e) {
             System.out.println(e);
@@ -61,7 +71,8 @@ public class ConnectToDatabase {
                     boolean test = Password.authenticatePassword(pass, hashedPass);
 
                     Statement createSuperUser = con.createStatement();
-                    createSuperUser.executeQuery("INSERT INTO users (Name, Password, Permissions) VALUES('admin', '" + hashedPass + "', 'Create Billboard,Edit Billboard,Schedule Billboard,Edit Users,Administrator')");
+                    createSuperUser.execute("INSERT INTO users (Name, Password) VALUES('admin', '" + hashedPass + "')");
+                    createSuperUser.execute("INSERT INTO user_permissions (UserName, PermissionName) VALUES('admin', 'Create Billboard'), ('admin', 'Edit Billboard'), ('admin', 'Schedule Billboard'), ('admin', 'Edit Users')");
                 }
             }
         }

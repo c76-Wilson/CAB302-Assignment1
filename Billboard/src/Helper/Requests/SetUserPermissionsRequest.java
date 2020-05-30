@@ -1,8 +1,6 @@
 package Helper.Requests;
 
-import Helper.UserPermissions;
-
-import java.util.EnumSet;
+import java.util.LinkedList;
 
 public class SetUserPermissionsRequest extends Request{
     //region User Name
@@ -18,11 +16,11 @@ public class SetUserPermissionsRequest extends Request{
     //endregion
 
     //region Permissions
-    private EnumSet<UserPermissions> permissions;
+    private LinkedList<String> permissions;
 
-    public EnumSet<UserPermissions> getPermissions() { return permissions; }
+    public LinkedList<String> getPermissions() { return permissions; }
 
-    public void setPermissions(EnumSet<UserPermissions> permissions) {
+    public void setPermissions(LinkedList<String> permissions) {
         this.permissions = permissions;
     }
     //endregion
@@ -39,7 +37,7 @@ public class SetUserPermissionsRequest extends Request{
     }
     //endregion
 
-    public SetUserPermissionsRequest(String userName, EnumSet<UserPermissions> permissions, String sessionToken) {
+    public SetUserPermissionsRequest(String userName, LinkedList<String> permissions, String sessionToken) {
         this.setUserName(userName);
         this.setPermissions(permissions);
         this.setSessionToken(sessionToken);

@@ -29,7 +29,7 @@ public class CreateEditBillboardRequest extends Request{
     //region Billboard Contents
     private String billboardContents;
 
-    public String billboardContents() {
+    public String getBillboardContents() {
         return billboardContents;
     }
 

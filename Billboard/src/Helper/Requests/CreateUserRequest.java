@@ -1,9 +1,6 @@
 package Helper.Requests;
 
-import Helper.UserPermissions;
-
-import java.sql.Date;
-import java.util.EnumSet;
+import java.util.LinkedList;
 
 public class CreateUserRequest extends Request{
     //region User Name
@@ -19,11 +16,11 @@ public class CreateUserRequest extends Request{
     //endregion
 
     //region Permissions
-    private EnumSet<UserPermissions> permissions;
+    private LinkedList<String> permissions;
 
-    public EnumSet<UserPermissions> getPermissions() { return permissions; }
+    public LinkedList<String> getPermissions() { return permissions; }
 
-    public void setPermissions(EnumSet<UserPermissions> permissions) {
+    public void setPermissions(LinkedList<String> permissions) {
         this.permissions = permissions;
     }
     //endregion
@@ -52,7 +49,7 @@ public class CreateUserRequest extends Request{
     }
     //endregion
 
-    public CreateUserRequest(String userName, EnumSet<UserPermissions> permissions, String hashedPassword, String sessionToken) {
+    public CreateUserRequest(String userName, LinkedList<String> permissions, String hashedPassword, String sessionToken) {
         this.setUserName(userName);
         this.setPermissions(permissions);
         this.setHashedPassword(hashedPassword);
