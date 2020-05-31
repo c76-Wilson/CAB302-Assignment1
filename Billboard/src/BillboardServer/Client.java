@@ -48,34 +48,53 @@ public class Client {
         Object obj = clientInputStream.readObject();
 
         if (obj.getClass() == String.class){
+
             String sessionToken = (String)obj;
 
-            Socket socket2 = new Socket("127.0.0.1", 4444);
+            Socket socket1 = new Socket("127.0.0.1", 4444);
 
-            ScheduleBillboardRequest createEditBillboardRequest = new ScheduleBillboardRequest("Test", LocalDateTime.now().plusHours(1), Duration.ofMinutes(30), sessionToken);
+            CreateEditBillboardRequest createEditBillboardRequest = new CreateEditBillboardRequest(sessionToken, "Test", new String(Files.readAllBytes(Paths.get("src\\BillboardServer\\error.xml"))));
 
-            output = new ObjectOutputStream(socket2.getOutputStream());
+            output = new ObjectOutputStream(socket1.getOutputStream());
 
             output.writeObject(createEditBillboardRequest);
 
-            clientInputStream = new ObjectInputStream(socket2.getInputStream());
+            clientInputStream = new ObjectInputStream(socket1.getInputStream());
             Object createObject = clientInputStream.readObject();
 
             if (obj.getClass() == String.class){
-                Socket socket3 = new Socket("127.0.0.1", 4444);
+                Socket socket2 = new Socket("127.0.0.1", 4444);
 
-                ViewScheduleRequest viewScheduleRequest = new ViewScheduleRequest(sessionToken);
+                ScheduleBillboardRequest scheduleBillboardRequest = new ScheduleBillboardRequest("Test", LocalDateTime.now().plusHours(1), Duration.ofMinutes(30), sessionToken);
 
-                output = new ObjectOutputStream(socket3.getOutputStream());
+                output = new ObjectOutputStream(socket2.getOutputStream());
 
-                output.writeObject(viewScheduleRequest);
+                output.writeObject(scheduleBillboardRequest);
 
-                clientInputStream = new ObjectInputStream(socket3.getInputStream());
-                Object viewObject = clientInputStream.readObject();
+                clientInputStream = new ObjectInputStream(socket2.getInputStream());
+                Object scheduleObject = clientInputStream.readObject();
+
+                if (obj.getClass() == String.class){
+                    Socket socket3 = new Socket("127.0.0.1", 4444);
+
+                    ViewScheduleRequest viewScheduleRequest = new ViewScheduleRequest(sessionToken);
+
+                    output = new ObjectOutputStream(socket3.getOutputStream());
+
+                    output.writeObject(viewScheduleRequest);
+
+                    clientInputStream = new ObjectInputStream(socket3.getInputStream());
+                    Object viewObject = clientInputStream.readObject();
+                }
+                else if (obj.getClass() == ErrorMessage.class){
+                    System.out.println(((ErrorMessage)obj).getErrorMessage());
+                }
             }
             else if (obj.getClass() == ErrorMessage.class){
                 System.out.println(((ErrorMessage)obj).getErrorMessage());
             }
+
+
         }
         else if (obj.getClass() == ErrorMessage.class){
             System.out.println(((ErrorMessage)obj).getErrorMessage());

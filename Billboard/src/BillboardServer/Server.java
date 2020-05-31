@@ -224,11 +224,11 @@ public class Server {
 
         }
         // If list users request
-        else if (request.getClass() == DeleteBillboardRequest.class){
+        else if (request.getClass() == ListUsersRequest.class){
 
         }
         // If create user request
-        else if (request.getClass() == DeleteBillboardRequest.class){
+        else if (request.getClass() == CreateUserRequest.class){
 
         }
         return null;
