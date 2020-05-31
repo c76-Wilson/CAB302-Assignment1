@@ -2,6 +2,7 @@ package BillboardServer;
 
 import Helper.Billboard;
 import Helper.Password;
+import Helper.Requests.CreateUserRequest;
 import Helper.Requests.LoginRequest;
 import Helper.Responses.ErrorMessage;
 import Helper.ScheduledBillboard;
@@ -144,6 +145,39 @@ public class Evaluate {
             return true;
         }
         return false;
+    }
+
+    public static Object EvaluateCreateUser(Connection con, CreateUserRequest request) throws Exception {
+        String sql = String.format("INSERT INTO users (Name, Password) VALUES ('%s', '%s');", request.getUserName(), Password.getSaltedHash(request.getHashedPassword()));
+
+        try {
+            Statement statement = con.createStatement();
+
+            statement.executeQuery(sql);
+
+            if (request.getPermissions().size() > 0) {
+                String permissionSQL = "INSERT INTO user_permissions (UserName, PermissionName) VALUES";
+
+                for (String permission : request.getPermissions()){
+                    if (permission != request.getPermissions().getFirst()){
+                        permissionSQL = permissionSQL.concat(",");
+                    }
+                    permissionSQL = permissionSQL.concat(String.format(" ('%s', '%s')", request.getUserName(), permission));
+                }
+
+                permissionSQL = permissionSQL.concat(";");
+
+                statement.executeQuery(permissionSQL);
+            }
+
+            return true;
+        }
+        catch (SQLException e){
+            if (e.getMessage().contains("Duplicate entry")) {
+                return new ErrorMessage("User already exists!");
+            }
+            return new ErrorMessage(e.getMessage());
+        }
     }
 
     private static String EscapeString(String input){

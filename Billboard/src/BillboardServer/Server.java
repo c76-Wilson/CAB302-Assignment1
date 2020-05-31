@@ -229,7 +229,20 @@ public class Server {
         }
         // If create user request
         else if (request.getClass() == CreateUserRequest.class){
+            CreateUserRequest userRequest = (CreateUserRequest)request;
+            // Check session token
+            if (checkSessionToken(userRequest.getSessionToken())){
+                // Check permissions
+                LinkedList<String> permissions = new LinkedList<String>();
+                permissions.add("Edit Users");
 
+                if (checkPermissions(con, getSessionToken(userRequest.getSessionToken()), permissions)){
+                    return Evaluate.EvaluateCreateUser(con, userRequest);
+                }
+            }
+            else{
+                return new ErrorMessage("Invalid session token!");
+            }
         }
         return null;
     }
