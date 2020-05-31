@@ -9,10 +9,7 @@ import jdk.jfr.Timespan;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Time;
+import java.sql.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -20,22 +17,17 @@ import java.util.Date;
 
 public class Evaluate {
     public static Object EvaluateCurrentBillboard(Connection con) throws Exception{
+        // Update schedules for recurrence before evaluating current billboard
+        UpdateNextScheduled(con);
+
         Statement statement = con.createStatement();
 
-        String sql = String.format("SELECT * FROM schedules WHERE (StartTime <= \"%s\" AND (StartTime + Duration) >= \"%s\") OR (NextOccurrence <= \"%s\" AND (NextOccurrence + Duration) >= \"%s\") ORDER BY ID DESC LIMIT 1", LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now());
+        String sql = String.format("SELECT * FROM schedules WHERE StartTime <= NOW() AND (StartTime + INTERVAL Duration MINUTE) >= NOW() ORDER BY ID DESC LIMIT 1");
 
         ResultSet scheduleResult = statement.executeQuery(sql);
 
         if (scheduleResult.next()){
-
-            // If next occurrence is the current time - update starting to nextoccurrence, and set nextoccurrence to be the next occurrence
-            if (scheduleResult.getTimestamp("NextOccurrence").toLocalDateTime().isBefore(LocalDateTime.now())){
-                LocalDateTime currentStartTime = scheduleResult.getTimestamp("NextOccurrence").toLocalDateTime();
-
-                statement.executeQuery(String.format("UPDATE schedules SET StartTime = \"%s\", NextOccurrence = ? WHERE ID = %d", currentStartTime, scheduleResult.getInt("ID"), scheduleResult.getTimestamp("NextOccurrence").toLocalDateTime().plus(Duration.parse(scheduleResult.getString("RecurringEvery")))));
-            }
-
-            ResultSet billboardResult = statement.executeQuery(String.format("SELECT XML FROM billboards WHERE ScheduleID = %d LIMIT 1", scheduleResult.getInt("ID")));
+            ResultSet billboardResult = statement.executeQuery(String.format("SELECT * FROM billboards WHERE ScheduleID = %d LIMIT 1", scheduleResult.getInt("ID")));
 
             if (billboardResult.next()){
                 return ConvertResultSetToBillboard(billboardResult);
@@ -49,6 +41,13 @@ public class Evaluate {
 
             return contents;
         }
+    }
+
+    private static void UpdateNextScheduled(Connection con) throws Exception{
+        // Update schedules where passed schedule time and recurring
+        Statement statement = con.createStatement();
+        String sql = String.format("UPDATE schedules SET StartTime = StartTime + INTERVAL RecurringEvery MINUTE WHERE ID IN (SELECT ID FROM schedules WHERE RecurringEvery != null AND StartTime + INTERVAL Duration MINUTE <= NOW());");
+        statement.executeQuery(sql);
     }
 
     public static Object EvaluateLogin(Connection con, LoginRequest request)throws Exception{
@@ -114,12 +113,20 @@ public class Evaluate {
     }
 
     public static Object EvaluateScheduleBillboard(Connection con, String billboardName, LocalDateTime scheduleTime, Duration duration, Duration recurrence, String creatorName) throws Exception{
-        Statement statement = con.createStatement();
-
-        String sql = String.format("INSERT INTO schedules (BillboardName, StartTime, NextOccurrence, Duration, RecurringEvery, CreatorName) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')", billboardName, scheduleTime, scheduleTime.plusNanos(duration.toNanos()), duration, recurrence, creatorName);
+        String sql = String.format("INSERT INTO schedules (BillboardName, StartTime, Duration, RecurringEvery, CreatorName) VALUES ('%s', '%s', %d, %d, '%s')", billboardName, scheduleTime, duration.toMinutes(), recurrence == null ? null : recurrence.toMinutes(), creatorName);
         // Insert or update billboard
-        statement.executeQuery(sql);
-        return true;
+        PreparedStatement statement = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+        statement.executeUpdate();
+
+        ResultSet insertResults = statement.getGeneratedKeys();
+
+        if (insertResults.next()) {
+            String sql2 = String.format("UPDATE billboards SET ScheduleID = %s WHERE Name = '%s';", insertResults.getInt(1), billboardName);
+            statement.executeQuery(sql2);
+            return true;
+        }
+        return false;
     }
 
     private static String EscapeString(String input){

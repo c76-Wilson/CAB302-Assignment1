@@ -15,35 +15,54 @@ import java.time.LocalDateTime;
 public class Client {
     public static void main(String args[]){
         try {
-            LoginRequest request = new LoginRequest("admin", Password.hash("root"));
-            Socket socket = new Socket("127.0.0.1", 4444);
 
-            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            TestGetCurrentBillboard();
+            TestLoginAndSchedule();
 
-            output.writeObject(request);
-
-            ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
-            Object obj = clientInputStream.readObject();
-
-            if (obj.getClass() == String.class){
-                String sessionToken = (String)obj;
-
-                Socket socket2 = new Socket("127.0.0.1", 4444);
-
-                ScheduleBillboardRequest createEditBillboardRequest = new ScheduleBillboardRequest("Test", LocalDateTime.now().plusHours(1), Duration.ofMinutes(30), sessionToken, Duration.ofDays(1));
-
-                output = new ObjectOutputStream(socket2.getOutputStream());
-
-                output.writeObject(createEditBillboardRequest);
-
-                clientInputStream = new ObjectInputStream(socket2.getInputStream());
-                Object createObject = clientInputStream.readObject();
-            }
-            else if (obj.getClass() == ErrorMessage.class){
-                System.out.println(((ErrorMessage)obj).getErrorMessage());
-            }
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+
+    private static void TestGetCurrentBillboard() throws Exception{
+        CurrentBillboardRequest request = new CurrentBillboardRequest();
+        Socket socket = new Socket("127.0.0.1", 4444);
+
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+
+        output.writeObject(request);
+
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+        String xml = (String)clientInputStream.readObject();
+    }
+
+    private static void TestLoginAndSchedule() throws Exception{
+        LoginRequest request = new LoginRequest("admin", Password.hash("root"));
+        Socket socket = new Socket("127.0.0.1", 4444);
+
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+
+        output.writeObject(request);
+
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+        Object obj = clientInputStream.readObject();
+
+        if (obj.getClass() == String.class){
+            String sessionToken = (String)obj;
+
+            Socket socket2 = new Socket("127.0.0.1", 4444);
+
+            ScheduleBillboardRequest createEditBillboardRequest = new ScheduleBillboardRequest("Test", LocalDateTime.now().plusHours(1), Duration.ofMinutes(30), sessionToken);
+
+            output = new ObjectOutputStream(socket2.getOutputStream());
+
+            output.writeObject(createEditBillboardRequest);
+
+            clientInputStream = new ObjectInputStream(socket2.getInputStream());
+            Object createObject = clientInputStream.readObject();
+        }
+        else if (obj.getClass() == ErrorMessage.class){
+            System.out.println(((ErrorMessage)obj).getErrorMessage());
         }
     }
 }

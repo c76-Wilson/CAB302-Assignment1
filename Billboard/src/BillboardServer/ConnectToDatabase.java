@@ -38,7 +38,7 @@ public class ConnectToDatabase {
             //Run Create Table If Not Exists Query
             Statement createTables = con.createStatement();
             createTables.execute("CREATE TABLE IF NOT EXISTS `billboards` (`Name` varchar(256) NOT NULL,  `XML` longtext NOT NULL,  `CreatorName` varchar(256) NOT NULL,  `ScheduleID` int(11) DEFAULT NULL,  PRIMARY KEY (`Name`));");
-            createTables.execute("CREATE TABLE IF NOT EXISTS `schedules` (`ID` int(11) NOT NULL AUTO_INCREMENT,  `BillboardName` varchar(256) NOT NULL,  `StartTime` datetime NOT NULL, `NextOccurrence` datetime DEFAULT NULL,  `Duration` varchar(50) NOT NULL,  `RecurringEvery` varchar(50) DEFAULT NULL,  `CreatorName` varchar(256) NOT NULL,  PRIMARY KEY (`ID`));");
+            createTables.execute("CREATE TABLE IF NOT EXISTS `schedules` (`ID` int(11) NOT NULL AUTO_INCREMENT,  `BillboardName` varchar(256) NOT NULL,  `StartTime` datetime NOT NULL, `Duration` varchar(50) NOT NULL,  `RecurringEvery` varchar(50) DEFAULT NULL,  `CreatorName` varchar(256) NOT NULL,  PRIMARY KEY (`ID`));");
             createTables.execute("CREATE TABLE IF NOT EXISTS `users` (`Name` varchar(256) NOT NULL,  `Password` varchar(256) NOT NULL,  PRIMARY KEY (`Name`));");
             createTables.execute("CREATE TABLE IF NOT EXISTS `permissions` (`Name` varchar(256) NOT NULL, PRIMARY KEY (`Name`));");
 
