@@ -8,6 +8,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -699,88 +700,70 @@ public class ControlFrame implements ActionListener {
 
         //create menus
         JMenu fileMenu = new JMenu("File");
-        JMenu editMenu = new JMenu("Edit");
+        JMenu usersMenu = new JMenu("Users");
+        JMenu viewMenu = new JMenu("View");
         final JMenu aboutMenu = new JMenu("About");
-        final JMenu linkMenu = new JMenu("Links");
 
         //create menu items
-        JMenuItem newMenuItem = new JMenuItem("New");
-        newMenuItem.setMnemonic(KeyEvent.VK_N);
+        JMenuItem newMenuItem = new JMenuItem("New Billboard");
         newMenuItem.setActionCommand("New");
 
-        JMenuItem openMenuItem = new JMenuItem("Open");
-        openMenuItem.setActionCommand("Open");
+        JMenuItem importMenuItem = new JMenuItem("Import Billboard");
+        importMenuItem.setActionCommand("Import");
 
-        JMenuItem saveMenuItem = new JMenuItem("Save");
-        saveMenuItem.setActionCommand("Save");
+        JMenuItem exportMenuItem = new JMenuItem("Export Billboard");
+        exportMenuItem.setActionCommand("Export");
 
-        JMenuItem exitMenuItem = new JMenuItem("Exit");
-        exitMenuItem.setActionCommand("Exit");
+        JMenuItem createMenuItem = new JMenuItem("Create Users");
+        createMenuItem.setActionCommand("Create");
 
-        JMenuItem cutMenuItem = new JMenuItem("Cut");
-        cutMenuItem.setActionCommand("Cut");
+        JMenuItem editMenuItem = new JMenuItem("Edit Users");
+        editMenuItem.setActionCommand("Edit");
 
-        JMenuItem copyMenuItem = new JMenuItem("Copy");
-        copyMenuItem.setActionCommand("Copy");
+        JMenuItem viewBillboardItem = new JMenuItem("View Billboards");
+        viewBillboardItem.setActionCommand("View Billboard");
 
-        JMenuItem pasteMenuItem = new JMenuItem("Paste");
-        pasteMenuItem.setActionCommand("Paste");
+        JMenuItem viewScheduleItem = new JMenuItem("View Schedule");
+        viewScheduleItem.setActionCommand("View Schedule");
+
+        JMenuItem viewUserItem = new JMenuItem("View Users");
+        viewUserItem.setActionCommand("View User");
+
+        JMenuItem aboutUsMenu = new JMenuItem("About Us");
+        aboutUsMenu.setActionCommand("About");
 
         MenuItemListener menuItemListener = new MenuItemListener();
 
         newMenuItem.addActionListener(menuItemListener);
-        openMenuItem.addActionListener(menuItemListener);
-        saveMenuItem.addActionListener(menuItemListener);
-        exitMenuItem.addActionListener(menuItemListener);
-        cutMenuItem.addActionListener(menuItemListener);
-        copyMenuItem.addActionListener(menuItemListener);
-        pasteMenuItem.addActionListener(menuItemListener);
+        importMenuItem.addActionListener(menuItemListener);
+        exportMenuItem.addActionListener(menuItemListener);
+        createMenuItem.addActionListener(menuItemListener);
+        editMenuItem.addActionListener(menuItemListener);
+        viewBillboardItem.addActionListener(menuItemListener);
+        viewScheduleItem.addActionListener(menuItemListener);
+        viewUserItem.addActionListener(menuItemListener);
+        aboutUsMenu.addActionListener(menuItemListener);
 
-        final JCheckBoxMenuItem showWindowMenu = new JCheckBoxMenuItem("Show About", true);
-        showWindowMenu.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
 
-                if(showWindowMenu.getState()){
-                    menuBar.add(aboutMenu);
-                } else {
-                    menuBar.remove(aboutMenu);
-                }
-            }
-        });
-        final JRadioButtonMenuItem showLinksMenu = new JRadioButtonMenuItem(
-                "Show Links", true);
-        showLinksMenu.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-
-                if(menuBar.getMenu(3)!= null){
-                    menuBar.remove(linkMenu);
-                    frame.repaint();
-                } else {
-                    menuBar.add(linkMenu);
-                    frame.repaint();
-                }
-            }
-        });
         //add menu items to menus
         fileMenu.add(newMenuItem);
-        fileMenu.add(openMenuItem);
-        fileMenu.add(saveMenuItem);
-        fileMenu.addSeparator();
-        fileMenu.add(showWindowMenu);
-        fileMenu.addSeparator();
-        fileMenu.add(showLinksMenu);
-        fileMenu.addSeparator();
-        fileMenu.add(exitMenuItem);
+        fileMenu.add(importMenuItem);
+        fileMenu.add(exportMenuItem);
 
-        editMenu.add(cutMenuItem);
-        editMenu.add(copyMenuItem);
-        editMenu.add(pasteMenuItem);
+        usersMenu.add(createMenuItem);
+        usersMenu.add(editMenuItem);
+
+        viewMenu.add(viewBillboardItem);
+        viewMenu.add(viewScheduleItem);
+        viewMenu.add(viewUserItem);
+
+        aboutMenu.add(aboutUsMenu);
 
         //add menu to menubar
         menuBar.add(fileMenu);
-        menuBar.add(editMenu);
+        menuBar.add(usersMenu);
+        menuBar.add(viewMenu);
         menuBar.add(aboutMenu);
-        menuBar.add(linkMenu);
 
         //add menubar to the frame
         frame.setJMenuBar(menuBar);
@@ -909,10 +892,32 @@ public class ControlFrame implements ActionListener {
 
     class MenuItemListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            if(e.getActionCommand() == "Exit"){
-                frame.dispose();
-            } else {
-                statusLabel.setText(e.getActionCommand() + " JMenuItem clicked.");
+            if(e.getActionCommand() == "New"){
+
+            } else if (e.getActionCommand() == "Import"){
+
+            } else if (e.getActionCommand() == "Export"){
+
+            } else if (e.getActionCommand() == "Create"){
+
+            } else if (e.getActionCommand() == "Edit"){
+
+            } else if (e.getActionCommand() == "View Billboard"){
+
+            } else if (e.getActionCommand() == "View Schedule"){
+
+            } else if (e.getActionCommand() == "View User"){
+
+            } else if (e.getActionCommand() == "About"){
+                JOptionPane aboutBox = new JOptionPane();
+                aboutBox.showMessageDialog(frame,
+                        "<html>This Project was made by Group_068<br/>" +
+                                "(Connor Wilson n10008276)<br/>" +
+                                "(Daniel Lawless n87654321)<br/>" +
+                                "(Pierce Evans n09990887)<br/>" +
+                                "for the CAB302 Assignment 2020<html/>",
+                        "About Us",
+                        JOptionPane.PLAIN_MESSAGE);
             }
         }
     }
