@@ -4,6 +4,7 @@ import Helper.Billboard;
 import Helper.Password;
 import Helper.Requests.LoginRequest;
 import Helper.Responses.ErrorMessage;
+import jdk.jfr.Timespan;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -12,6 +13,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Time;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Date;
@@ -30,7 +32,7 @@ public class Evaluate {
             if (scheduleResult.getTimestamp("NextOccurrence").toLocalDateTime().isBefore(LocalDateTime.now())){
                 LocalDateTime currentStartTime = scheduleResult.getTimestamp("NextOccurrence").toLocalDateTime();
 
-                statement.executeQuery(String.format("UPDATE schedules SET StartTime = \"%s\", NextOccurrence = NextOccurrence + CAST(RecurringEvery AS DATETIME) WHERE ID = %d", currentStartTime, scheduleResult.getInt("ID")));
+                statement.executeQuery(String.format("UPDATE schedules SET StartTime = \"%s\", NextOccurrence = ? WHERE ID = %d", currentStartTime, scheduleResult.getInt("ID"), scheduleResult.getTimestamp("NextOccurrence").toLocalDateTime().plus(Duration.parse(scheduleResult.getString("RecurringEvery")))));
             }
 
             ResultSet billboardResult = statement.executeQuery(String.format("SELECT XML FROM billboards WHERE ScheduleID = %d LIMIT 1", scheduleResult.getInt("ID")));
@@ -105,13 +107,16 @@ public class Evaluate {
     public static Object EvaluateCreateEditBillboard(Connection con, Billboard billboard) throws Exception{
         Statement statement = con.createStatement();
         String escapedXML = EscapeString(billboard.getXml());
-        String sql = String.format("DELIMITER $ \r\n" +
-                "BEGIN NOT ATOMIC\r\n" +
-                "IF EXISTS(SELECT * FROM billboards where Name=\"%s\") THEN UPDATE billboards SET XML='%s' where Name=\"%s\";\r\n" +
-                "ELSE insert into billboards(Name, XML, CreatorID) values('%s', '%s', '%s');\r\n" +
-                "END IF;\r\n" +
-                "END $\r\n" +
-                "DELIMITER ;", billboard.getName(), escapedXML, billboard.getName(), billboard.getName(), escapedXML, billboard.getCreatorName());
+        String sql = String.format("INSERT INTO billboards(Name, XML, CreatorName) VALUES ('%s', '%s', '%s') ON DUPLICATE KEY UPDATE XML = '%s';", billboard.getName(), escapedXML, billboard.getCreatorName(), escapedXML);
+        // Insert or update billboard
+        statement.execute(sql);
+        return true;
+    }
+
+    public static Object EvaluateScheduleBillboard(Connection con, String billboardName, LocalDateTime scheduleTime, Duration duration, Duration recurrence, String creatorName) throws Exception{
+        Statement statement = con.createStatement();
+
+        String sql = String.format("INSERT INTO schedules (BillboardName, StartTime, NextOccurrence, Duration, RecurringEvery, CreatorName) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')", billboardName, scheduleTime, scheduleTime.plusNanos(duration.toNanos()), duration, recurrence, creatorName);
         // Insert or update billboard
         statement.executeQuery(sql);
         return true;

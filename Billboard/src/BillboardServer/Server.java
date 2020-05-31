@@ -189,13 +189,29 @@ public class Server {
         else if (request.getClass() == ViewScheduleRequest.class){
 
         }
+        // If schedule billboard request
+        else if (request.getClass() == ScheduleBillboardRequest.class){
+            ScheduleBillboardRequest scheduleRequest = (ScheduleBillboardRequest)request;
+            // Check session token
+            if (checkSessionToken(scheduleRequest.getSessionToken())){
+                // Check permissions
+                LinkedList<String> permissions = new LinkedList<String>();
+                permissions.add("Schedule Billboard");
+
+                if (checkPermissions(con, getSessionToken(scheduleRequest.getSessionToken()), permissions)){
+                    Evaluate.EvaluateScheduleBillboard(con, scheduleRequest.getBillboardName(), scheduleRequest.getScheduleTime(), scheduleRequest.getDuration(), scheduleRequest.getRecurring(), getSessionToken(scheduleRequest.getSessionToken()).getUserName());
+                }
+            }
+            else{
+                return new ErrorMessage("Invalid session token!");
+            }
+        }
         return null;
     }
 
     public static SessionToken getSessionToken(String token){
         // Gets a session token object from the string
         for (SessionToken sessionToken : sessionTokens){
-            String tokenen = sessionToken.getSessionToken();
             if (sessionToken.getSessionToken().equals(token)){
                 return sessionToken;
             }

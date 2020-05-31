@@ -1,10 +1,7 @@
 package BillboardServer;
 
 import Helper.Password;
-import Helper.Requests.CreateEditBillboardRequest;
-import Helper.Requests.CurrentBillboardRequest;
-import Helper.Requests.GetBillboardRequest;
-import Helper.Requests.LoginRequest;
+import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
 
 import java.io.ObjectInputStream;
@@ -12,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Client {
@@ -32,7 +30,7 @@ public class Client {
 
                 Socket socket2 = new Socket("127.0.0.1", 4444);
 
-                CreateEditBillboardRequest createEditBillboardRequest = new CreateEditBillboardRequest(sessionToken, "Test", new String(Files.readAllBytes(Paths.get("src\\BillboardServer\\error.xml"))));
+                ScheduleBillboardRequest createEditBillboardRequest = new ScheduleBillboardRequest("Test", LocalDateTime.now().plusHours(1), Duration.ofMinutes(30), sessionToken, Duration.ofDays(1));
 
                 output = new ObjectOutputStream(socket2.getOutputStream());
 

@@ -3,6 +3,9 @@ package Helper.Requests;
 import jdk.jfr.Timespan;
 
 import java.sql.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.Period;
 
 public class ScheduleBillboardRequest extends Request {
     //region Billboard Name
@@ -18,24 +21,36 @@ public class ScheduleBillboardRequest extends Request {
     //endregion
 
     //region Time
-    private Date scheduleTime;
+    private LocalDateTime scheduleTime;
 
-    public Date getScheduleTime() { return scheduleTime; }
+    public LocalDateTime getScheduleTime() { return scheduleTime; }
 
-    public void setScheduleTime(Date scheduleTime) {
+    public void setScheduleTime(LocalDateTime scheduleTime) {
         this.scheduleTime = scheduleTime;
     }
     //endregion
 
     //region Duration
-    private Timespan duration;
+    private Duration duration;
 
-    public Timespan getDuration() {
+    public Duration getDuration() {
         return duration;
     }
 
-    public void setDuration(Timespan duration) {
+    public void setDuration(Duration duration) {
         this.duration = duration;
+    }
+    //endregion
+
+    //region Recurring
+    private Duration recurring;
+
+    public Duration getRecurring() {
+        return recurring;
+    }
+
+    public void setRecurring(Duration recurring) {
+        this.recurring = recurring;
     }
     //endregion
 
@@ -51,10 +66,18 @@ public class ScheduleBillboardRequest extends Request {
     }
     //endregion
 
-    public ScheduleBillboardRequest(String billboardName, Date scheduleTime, Timespan duration, String sessionToken) {
+    public ScheduleBillboardRequest(String billboardName, LocalDateTime scheduleTime, Duration duration, String sessionToken) {
         this.setBillboardName(billboardName);
         this.setScheduleTime(scheduleTime);
         this.setDuration(duration);
         this.setSessionToken(sessionToken);
+    }
+
+    public ScheduleBillboardRequest(String billboardName, LocalDateTime scheduleTime, Duration duration, String sessionToken, Duration recurring) {
+        this.setBillboardName(billboardName);
+        this.setScheduleTime(scheduleTime);
+        this.setDuration(duration);
+        this.setSessionToken(sessionToken);
+        this.setRecurring(recurring);
     }
 }
