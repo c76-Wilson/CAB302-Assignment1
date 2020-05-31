@@ -4,18 +4,24 @@ import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ControlFrame implements ActionListener {
 
@@ -42,12 +48,22 @@ public class ControlFrame implements ActionListener {
     private JLabel mainCanvas;
     private JColorChooser palette;
     private JLabel setTextLabel;
-    private JTextField setText;
+    private JTextArea setText;
     private JLabel setPosition;
     private JSpinner textX;
     private JSpinner textY;
+    private JLabel XHeader;
+    private JLabel YHeader;
     private JButton addText;
     private JButton saveBillboard;
+    private JLabel characterCount;
+
+    //Create Canvas Variables
+    private int xCoords = 480;
+    private int yCoords = 120;
+    private String textAdd;
+    private int textLength;
+    private DefaultStyledDocument textDocument;
 
     //Create Time Components
     private JLabel timeLabel;
@@ -111,6 +127,21 @@ public class ControlFrame implements ActionListener {
     //Create dummy JLabel
     private JLabel filler;
 
+    //Create global repetition spinner Model
+    SpinnerNumberModel repetitionModel;
+
+    //Create Date Regex Pattern
+    String date;
+    private static final String dateRegex =
+            "^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)" +
+                    "(?:0?[13-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})" +
+                    "$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)" +
+                    "?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))" +
+                    "$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)" +
+                    "(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$";
+
+    private static final Pattern datePattern = Pattern.compile(dateRegex);
+
     public ControlFrame(String title, boolean loginTrue){
         if(loginTrue){
             frame = new JFrame(title);
@@ -153,12 +184,160 @@ public class ControlFrame implements ActionListener {
         grid.gridy = 8;
         panel.add(scheduleButton, grid);
         TimeListener timeL = new TimeListener();
+        SpinListener spinL = new SpinListener();
         amRadio.addItemListener(timeL);
         pmRadio.addItemListener(timeL);
+        dayCheck.addItemListener(timeL);
+        hourCheck.addItemListener(timeL);
+        yearSpinner.addChangeListener(spinL);
+        monthSpinner.addChangeListener(spinL);
+        daySpinner.addChangeListener(spinL);
+        hourSpinner.addChangeListener(spinL);
+        minuteSpinner.addChangeListener(spinL);
+        durationSpin.addChangeListener(spinL);
+        repetitionMins.addChangeListener(spinL);
+        scheduleButton.addActionListener(e -> scheduleBillboard());
+    }
+
+    private void scheduleBillboard() {
+        if (day < 10 && month < 10){
+            date = "0" + day + "/0" + month + "/" + year;
+        } else if(day < 10){
+            date = "0" + day + "/" + month + "/" + year;
+        } else if (month < 10){
+            date = day + "/0" + month + "/" + year;
+        } else {
+            date = day + "/" + month + "/" + year;
+        }
+        if(hour >= 0 && hour < 10){
+            if (minute >= 0 && minute < 10){
+                if(meridiem == true){
+                    date = date + " 0" + hour + ":0" + minute + " pm";
+                } else if (meridiem == false){
+                    date = date + " 0" + hour + ":0" + minute + " am";
+                }
+            } else if (minute > 10){
+                if(meridiem == true){
+                    date = date + " 0" + hour + ":" + minute + " pm";
+                } else if (meridiem == false){
+                    date = date + " 0" + hour + ":" + minute + " am";
+                }
+            }
+        } else if (hour > 10){
+            if (minute >= 0 && minute < 10){
+                if(meridiem == true){
+                    date = date + " " + hour + ":0" + minute + " pm";
+                } else if (meridiem == false){
+                    date = date + " " + hour + ":0" + minute + " am";
+                }
+            } else if (minute > 10){
+                if(meridiem == true){
+                    date = date + " " + hour + ":" + minute + " pm";
+                } else if (meridiem == false){
+                    date = date + " " + hour + ":" + minute + " am";
+                }
+            }
+        }
+        if(validateDate(date)){
+
+        } else if (!validateDate(date)){
+            UIManager ui = new UIManager();
+            ui.put("OptionPane.messageForeground", Color.RED);
+            JOptionPane errorBox = new JOptionPane();
+            errorBox.showMessageDialog(frame, "Make sure the Date and Time of Scheduling " +
+                    "is after today's date and is a VALID date", "Invalid Date", JOptionPane.ERROR_MESSAGE);
+            frame.validate();
+        }
+    }
+
+    private boolean validateDate(String testDate){
+        try{
+            LocalDateTime today = LocalDateTime.now();
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
+            String todayDate = today.format(format);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+            Date inputDate = sdf.parse(testDate);
+            Date checkDate = sdf.parse(todayDate);
+            if(inputDate.before(checkDate)){
+                return false;
+            } else {
+                Matcher matcher = datePattern.matcher(testDate);
+                return matcher.matches();
+            }
+        } catch(ParseException e){
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void setupEditing() {
+        setTextLabel = new JLabel("Set Text");
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 9;
+        grid.gridy = 10;
+        panel.add(setTextLabel, grid);
 
+        setText = new JTextArea(8, 12);
+        setText.setLineWrap(true);
+        setText.setDocument(new PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if (str == null || setText.getText().length() >= 120) {
+                    return;
+                }
+
+                super.insertString(offs, str, a);
+            }
+        });
+        setText.getDocument().addDocumentListener(new TextListener());
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 9;
+        grid.gridy = 11;
+        panel.add(setText, grid);
+
+        characterCount = new JLabel(textLength + " / 120 Characters");
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 9;
+        grid.gridy = 12;
+        panel.add(characterCount, grid);
+
+        setPosition = new JLabel("Set Position");
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 9;
+        grid.gridy = 13;
+        panel.add(setPosition, grid);
+
+        XHeader = new JLabel("X");
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 9;
+        grid.gridy = 14;
+        panel.add(XHeader, grid);
+
+        YHeader = new JLabel("Y");
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 10;
+        grid.gridy = 14;
+        panel.add(YHeader, grid);
+
+        SpinnerNumberModel xModel = new SpinnerNumberModel(xCoords, 0, 960, 1);
+        textX = new JSpinner(xModel);
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 9;
+        grid.gridy = 15;
+        panel.add(textX, grid);
+
+        SpinnerNumberModel yModel = new SpinnerNumberModel(yCoords, 0, 240, 1);
+        textY = new JSpinner(yModel);
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 10;
+        grid.gridy = 15;
+        panel.add(textY, grid);
+
+        addText = new JButton("Add Text!");
+        grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridx = 9;
+        grid.gridy = 16;
+        panel.add(addText, grid);
     }
 
     private void setupRepetition() {
@@ -201,7 +380,7 @@ public class ControlFrame implements ActionListener {
         grid.gridy = 7;
         panel.add(hourCheck, grid);
 
-        SpinnerNumberModel repetitionModel = new SpinnerNumberModel(repeatMins, durMins, 59, 1);
+        repetitionModel = new SpinnerNumberModel(repeatMins, durMins + 1, 59, 1);
         repetitionMins = new JSpinner(repetitionModel);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 4;
@@ -231,6 +410,11 @@ public class ControlFrame implements ActionListener {
         ButtonGroup bg = new ButtonGroup();
         bg.add(amRadio);
         bg.add(pmRadio);
+        if(meridiem){
+            pmRadio.setSelected(true);
+        } else if(!meridiem){
+            amRadio.setSelected(true);
+        }
     }
 
     private void setupDurationLabels() {
@@ -411,6 +595,7 @@ public class ControlFrame implements ActionListener {
         });
 
         grid.fill = GridBagConstraints.HORIZONTAL;
+        grid.gridheight = 7;
         grid.gridx = 8;
         grid.gridy = 10;
         panel.add(palette, grid);
@@ -437,18 +622,22 @@ public class ControlFrame implements ActionListener {
         username.setMinimumSize(new Dimension(50, 10));
         password.setMinimumSize(new Dimension(50, 10));
         frame.add(panel);
+
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 0;
         grid.gridy = 0;
         panel.add(userLabel, grid);
+
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 1;
         grid.gridy = 0;
         panel.add(username, grid);
+
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 0;
         grid.gridy = 1;
         panel.add(passLabel, grid);
+
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 1;
         grid.gridy = 1;
@@ -598,18 +787,124 @@ public class ControlFrame implements ActionListener {
         frame.setVisible(true);
     }
 
+    class TextListener implements DocumentListener {
+        public void insertUpdate(DocumentEvent e) {
+            Document doc = e.getDocument();
+            textLength = doc.getLength();
+            characterCount.setText(textLength + " / 120 Characters");
+        }
+
+        public void removeUpdate(DocumentEvent e) {
+            Document doc = e.getDocument();
+            textLength = doc.getLength();
+            characterCount.setText(textLength + " / 120 Characters");
+        }
+
+        public void changedUpdate(DocumentEvent e) {
+            Document doc = e.getDocument();
+            textLength = doc.getLength();
+            characterCount.setText(textLength + " / 120 Characters");
+        }
+    }
+
+    class SpinListener implements ChangeListener {
+        @Override
+        public void stateChanged(ChangeEvent event){
+            Object spin = event.getSource();
+            if(spin.equals(yearSpinner)){
+                year = (Integer) yearSpinner.getValue();
+            } else if (spin.equals(monthSpinner)){
+                month = (Integer) monthSpinner.getValue();
+            } else if (spin.equals(daySpinner)){
+                day = (Integer) daySpinner.getValue();
+            } else if (spin.equals(hourSpinner)){
+                hour = (Integer) hourSpinner.getValue();
+            } else if (spin.equals(minuteSpinner)){
+                minute = (Integer) minuteSpinner.getValue();
+            } else if (spin.equals(durationSpin)){
+                durMins = (Integer) durationSpin.getValue();
+                repetitionModel.setMinimum(durMins + 1);
+                repetitionMins.setModel(repetitionModel);
+                if(durMins == 59) {
+                    ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(false);
+                    repetitionMins.setToolTipText("You cannot have repetition the same as the duration, try using the Hour Checkbox!");
+                }else if(repeatMins == durMins){
+                    repeatMins++;
+                    repetitionMins.setValue(repeatMins);
+                } else {
+                    repetitionMins.setToolTipText(null);
+                    ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(true);
+                }
+            } else if (spin.equals(repetitionMins)){
+                if((Integer) repetitionMins.getValue() == 0){
+
+                } else {
+                    repeatMins = (Integer) repetitionMins.getValue();
+                }
+            } else {
+                System.out.println("Huh, how'd you end up here?");
+            }
+        }
+    }
+
     class TimeListener implements ItemListener {
         @Override
         public void itemStateChanged(ItemEvent event){
             Object mer = event.getItem();
+            Object repeats = event.getItemSelectable();
             if(mer.equals(amRadio)){
                 meridiem = false;
             } else if (mer.equals(pmRadio)){
                 meridiem = true;
-            } else {
-                System.out.println("Huh?");
+            }
+            if (repeats.equals(dayCheck)){
+                repeatDay = true;
+                repeatHour = false;
+                hourCheck.setEnabled(false);
+                hourCheck.setBackground(new Color(255, 150, 150));
+                dayCheck.setBackground(new Color(150, 255, 150));
+                repetitionMins.setValue(0);
+                repetitionMins.setBackground(new Color(255, 150, 150));
+                ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(false);
+                repetitionMins.setToolTipText("Can only have 1 option selected");
+                hourCheck.setToolTipText("Can only have 1 option selected");
+            } else if (repeats.equals(hourCheck)){
+                repeatDay = false;
+                repeatHour = true;
+                dayCheck.setEnabled(false);
+                dayCheck.setBackground(new Color(255, 150, 150));
+                hourCheck.setBackground(new Color(150, 255, 150));
+                repetitionMins.setValue(0);
+                repetitionMins.setBackground(new Color(255, 150, 150));
+                ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(false);
+                repetitionMins.setToolTipText("Can only have 1 option selected");
+                dayCheck.setToolTipText("Can only have 1 option selected");
+            }
+            if(event.getStateChange() == ItemEvent.DESELECTED){
+                if(event.getItemSelectable() == dayCheck){
+                    repeatDay = false;
+                    hourCheck.setEnabled(true);
+                    repetitionMins.setValue(repeatMins);
+                    repetitionMins.setBackground(panel.getBackground());
+                    ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(true);
+                    repetitionMins.setToolTipText(null);
+                    hourCheck.setBackground(panel.getBackground());
+                    hourCheck.setToolTipText(null);
+                    dayCheck.setBackground(panel.getBackground());
+                } else if(event.getItemSelectable() == hourCheck){
+                    repeatHour = false;
+                    dayCheck.setEnabled(true);
+                    repetitionMins.setValue(repeatMins);
+                    repetitionMins.setBackground(panel.getBackground());
+                    ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(true);
+                    repetitionMins.setToolTipText(null);
+                    dayCheck.setBackground(panel.getBackground());
+                    dayCheck.setToolTipText(null);
+                    hourCheck.setBackground(panel.getBackground());
+                }
             }
         }
+
     }
 
     class MenuItemListener implements ActionListener {
