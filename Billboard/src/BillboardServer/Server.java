@@ -187,7 +187,20 @@ public class Server {
         }
         // If view schedule request
         else if (request.getClass() == ViewScheduleRequest.class){
+            ViewScheduleRequest scheduleRequest = (ViewScheduleRequest)request;
+            // Check session token
+            if (checkSessionToken(scheduleRequest.getSessionToken())){
+                // Check permissions
+                LinkedList<String> permissions = new LinkedList<String>();
+                permissions.add("Schedule Billboard");
 
+                if (checkPermissions(con, getSessionToken(scheduleRequest.getSessionToken()), permissions)){
+                    return Evaluate.EvaluateViewSchedule(con);
+                }
+            }
+            else{
+                return new ErrorMessage("Invalid session token!");
+            }
         }
         // If schedule billboard request
         else if (request.getClass() == ScheduleBillboardRequest.class){
@@ -199,12 +212,24 @@ public class Server {
                 permissions.add("Schedule Billboard");
 
                 if (checkPermissions(con, getSessionToken(scheduleRequest.getSessionToken()), permissions)){
-                    Evaluate.EvaluateScheduleBillboard(con, scheduleRequest.getBillboardName(), scheduleRequest.getScheduleTime(), scheduleRequest.getDuration(), scheduleRequest.getRecurring(), getSessionToken(scheduleRequest.getSessionToken()).getUserName());
+                    return Evaluate.EvaluateScheduleBillboard(con, scheduleRequest.getBillboardName(), scheduleRequest.getScheduleTime(), scheduleRequest.getDuration(), scheduleRequest.getRecurring(), getSessionToken(scheduleRequest.getSessionToken()).getUserName());
                 }
             }
             else{
                 return new ErrorMessage("Invalid session token!");
             }
+        }
+        // If remove billboard from schedule request
+        else if (request.getClass() == RemoveFromScheduleRequest.class){
+
+        }
+        // If list users request
+        else if (request.getClass() == DeleteBillboardRequest.class){
+
+        }
+        // If create user request
+        else if (request.getClass() == DeleteBillboardRequest.class){
+
         }
         return null;
     }

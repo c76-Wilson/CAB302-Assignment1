@@ -60,6 +60,22 @@ public class Client {
 
             clientInputStream = new ObjectInputStream(socket2.getInputStream());
             Object createObject = clientInputStream.readObject();
+
+            if (obj.getClass() == String.class){
+                Socket socket3 = new Socket("127.0.0.1", 4444);
+
+                ViewScheduleRequest viewScheduleRequest = new ViewScheduleRequest(sessionToken);
+
+                output = new ObjectOutputStream(socket3.getOutputStream());
+
+                output.writeObject(viewScheduleRequest);
+
+                clientInputStream = new ObjectInputStream(socket3.getInputStream());
+                Object viewObject = clientInputStream.readObject();
+            }
+            else if (obj.getClass() == ErrorMessage.class){
+                System.out.println(((ErrorMessage)obj).getErrorMessage());
+            }
         }
         else if (obj.getClass() == ErrorMessage.class){
             System.out.println(((ErrorMessage)obj).getErrorMessage());

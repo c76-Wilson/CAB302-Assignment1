@@ -4,6 +4,7 @@ import Helper.Billboard;
 import Helper.Password;
 import Helper.Requests.LoginRequest;
 import Helper.Responses.ErrorMessage;
+import Helper.ScheduledBillboard;
 import jdk.jfr.Timespan;
 
 import java.nio.file.Files;
@@ -14,6 +15,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Date;
+import java.util.LinkedList;
 
 public class Evaluate {
     public static Object EvaluateCurrentBillboard(Connection con) throws Exception{
@@ -110,6 +112,21 @@ public class Evaluate {
         // Insert or update billboard
         statement.execute(sql);
         return true;
+    }
+
+    public static Object EvaluateViewSchedule(Connection con) throws Exception{
+        Statement statement = con.createStatement();
+        String sql = "SELECT b.Name, b.CreatorName, s.StartTime, s.Duration FROM schedules s LEFT JOIN billboards b ON s.BillboardName = b.Name WHERE s.StartTime + INTERVAL s.Duration MINUTE >= NOW() AND s.StartTime < NOW() + INTERVAL 7 DAY;";
+
+        ResultSet scheduleResult = statement.executeQuery(sql);
+
+        LinkedList<ScheduledBillboard> billboards = new LinkedList<>();
+
+        while (scheduleResult.next()){
+            billboards.add(new ScheduledBillboard(scheduleResult.getString("Name"), scheduleResult.getString("CreatorName"), scheduleResult.getTimestamp("StartTime").toLocalDateTime(), Duration.parse(String.format("PT%dM", scheduleResult.getInt("Duration")))));
+        }
+
+        return billboards;
     }
 
     public static Object EvaluateScheduleBillboard(Connection con, String billboardName, LocalDateTime scheduleTime, Duration duration, Duration recurrence, String creatorName) throws Exception{

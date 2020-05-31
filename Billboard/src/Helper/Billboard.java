@@ -1,6 +1,8 @@
 package Helper;
 
-public class Billboard {
+import java.io.Serializable;
+
+public class Billboard implements Serializable {
     //region Name
     private String name;
 
