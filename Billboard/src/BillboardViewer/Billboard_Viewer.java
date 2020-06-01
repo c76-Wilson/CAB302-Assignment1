@@ -6,6 +6,7 @@ import Helper.Requests.LoginRequest;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import java.awt.event.*;
 import java.net.Socket;
 import java.util.Base64;
 
@@ -22,7 +23,7 @@ import java.net.URL;
 
 
 
-public class Billboard_Viewer extends JFrame implements Runnable {
+public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, MouseListener {
     //panels to hold the components in the jframe
     private JPanel mainPanel;
     private JPanel img_panel;
@@ -70,18 +71,24 @@ public class Billboard_Viewer extends JFrame implements Runnable {
         //set size to the width and height of the primary display
         setPreferredSize(window);
 
+
         //set process to terminate upon close
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //code to create panel for required components
         mainPanel = createPanel();
-
+        mainPanel.setFocusable(true);
+        mainPanel.addKeyListener(this);
+        mainPanel.addMouseListener(this);
 
         msg_panel = createPanel();
+        msg_panel.setFocusable(true);
 
         img_panel = createPanel();
+        img_panel.setFocusable(true);
 
         info_panel = createPanel();
+        info_panel.setFocusable(true);
 
         //code for testing purposes
         getContentPane().add(mainPanel);
@@ -580,6 +587,50 @@ public class Billboard_Viewer extends JFrame implements Runnable {
         
     }
 
+
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if(e.getKeyCode()==27)
+        {
+            System.exit(0);
+        };
+
+    }
+    @Override
+    public void mouseClicked(MouseEvent e){
+        System.exit(0);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
+    }
+
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
 }
 
 
