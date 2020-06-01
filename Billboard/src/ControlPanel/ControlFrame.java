@@ -12,11 +12,13 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -96,6 +98,10 @@ public class ControlFrame implements ActionListener {
     private JButton scheduleButton;
     private JCheckBox enableRep;
     private JLabel enableLabel;
+    private JTextField setBillboardName;
+    private String billboardName = "";
+    private int nameChars = 0;
+    private JLabel nameCount;
 
     //Create List Components
     private JLabel firstLabel;
@@ -126,6 +132,8 @@ public class ControlFrame implements ActionListener {
     private boolean meridiem = false;
     private boolean repeatDay = false;
     private boolean repeatHour = false;
+    private String testDateTime = "";
+    private int duration;
 
     //Create dummy JLabel
     private JLabel filler;
@@ -214,23 +222,64 @@ public class ControlFrame implements ActionListener {
             date = day + "/" + month + "/" + year;
         }
         if(validateDate(date)){
-            JOptionPane successBox = new JOptionPane();
-            ImageIcon icon = new ImageIcon(this.getClass().getResource("/images/Checkmark_green.jpg"));
-            successBox.showMessageDialog(frame, "Billboard Successfully Scheduled!", "Billboard Scheduled", JOptionPane.INFORMATION_MESSAGE, icon);
-            frame.validate();
+            if(repeatDay == true){
+                repeatMins = 1440;
+            } else if(repeatHour == true){
+                repeatMins = 60;
+            } else {
+
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
+            LocalDateTime scheduleTime = LocalDateTime.parse(testDateTime, formatter);
+            Duration dur = Duration.ofMinutes(duration);
+            Duration rep = Duration.ofMinutes(repeatMins);
+            ScheduleBillboardRequest billboard;
+            if(repeatMins > 0){
+                billboard = new ScheduleBillboardRequest(billboardName, scheduleTime, dur, sessionToken, rep);
+            } else {
+                billboard = new ScheduleBillboardRequest(billboardName, scheduleTime, dur, sessionToken);
+            }
+            Object obj = null;
+            try {
+                obj = scheduleTest(billboard);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (obj.getClass() == Boolean.class){
+                JOptionPane successBox = new JOptionPane();
+                ImageIcon icon = new ImageIcon(this.getClass().getResource("/images/Checkmark_green.jpg"));
+                successBox.showMessageDialog(frame, "Billboard Successfully Scheduled!", "Billboard Scheduled", JOptionPane.INFORMATION_MESSAGE, icon);
+                frame.validate();
+            }
+            else if (obj.getClass() == ErrorMessage.class){
+                JOptionPane failBox = new JOptionPane();
+                failBox.showMessageDialog(frame, "<html>Billboard Not Scheduled! ERROR in connecting to server<br/>"
+                                 + "<i>" + ((ErrorMessage) obj).getErrorMessage() + "<i/><html/>",
+                        "Billboard Didn't Schedule", JOptionPane.WARNING_MESSAGE);
+                frame.validate();
+            }
+
 
         } else if (!validateDate(date)){
             UIManager ui = new UIManager();
             ui.put("OptionPane.messageForeground", Color.RED);
             JOptionPane errorBox = new JOptionPane();
             errorBox.showMessageDialog(frame, "Make sure the Date and Time of Scheduling " +
-                    "is after today's date and is a VALID date", "Invalid Date", JOptionPane.ERROR_MESSAGE);
+                    "is after today's date and is a VALID date", "Invalid Date", JOptionPane.WARNING_MESSAGE);
             frame.validate();
         }
     }
 
+    private Object scheduleTest(ScheduleBillboardRequest billboard) throws Exception{
+        Socket socket = new Socket("localhost", 4444);
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+        output.writeObject(billboard);
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+        Object obj = clientInputStream.readObject();
+        return obj;
+    }
+
     private boolean validateDate(String testDate){
-        String testDateTime = "";
         try{
             if(hour < 10){
                 if(minute < 10){
@@ -301,6 +350,7 @@ public class ControlFrame implements ActionListener {
                 super.insertString(offs, str, a);
             }
         });
+        setText.getDocument().putProperty("Area", setText);
         setText.getDocument().addDocumentListener(new TextListener());
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
@@ -607,12 +657,36 @@ public class ControlFrame implements ActionListener {
     }
 
     private void setupCanvas() {
+        setBillboardName = new JTextField(50);
+        setBillboardName.setDocument(new PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if (str == null || setBillboardName.getText().length() >= 50) {
+                    return;
+                }
+
+                super.insertString(offs, str, a);
+            }
+        });
+        setBillboardName.getDocument().putProperty("Area", setBillboardName);
+        setBillboardName.getDocument().addDocumentListener(new TextListener());
+        grid.fill = GridBagConstraints.VERTICAL;
+        grid.gridx = 8;
+        grid.gridy = 0;
+        panel.add(setBillboardName, grid);
+
+        nameCount = new JLabel(nameChars + " / 50 Characters");
+        grid.fill = GridBagConstraints.VERTICAL;
+        grid.gridx = 9;
+        grid.gridy = 0;
+        panel.add(nameCount, grid);
+
         mainCanvas = new JLabel("Test");
         mainCanvas.setForeground(new Color(50, 50, 50));
         mainCanvas.setMaximumSize(new Dimension(960, 240));
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 8;
-        grid.gridy = 0;
+        grid.gridy = 1;
         panel.add(mainCanvas, grid);
         mainCanvas.setVisible(true);
     }
@@ -802,20 +876,38 @@ public class ControlFrame implements ActionListener {
     class TextListener implements DocumentListener {
         public void insertUpdate(DocumentEvent e) {
             Document doc = e.getDocument();
-            textLength = doc.getLength();
-            characterCount.setText(textLength + " / 120 Characters");
+            Object area = doc.getProperty("Area");
+            if(area.equals(setBillboardName)){
+                nameChars = doc.getLength();
+                nameCount.setText(nameChars + " / 50 Characters");
+            } else if (area.equals(setText)){
+                textLength = doc.getLength();
+                characterCount.setText(textLength + " / 120 Characters");
+            }
         }
 
         public void removeUpdate(DocumentEvent e) {
             Document doc = e.getDocument();
-            textLength = doc.getLength();
-            characterCount.setText(textLength + " / 120 Characters");
+            Object area = doc.getProperty("Area");
+            if(area.equals(setBillboardName)){
+                nameChars = doc.getLength();
+                nameCount.setText(nameChars + " / 50 Characters");
+            } else if (area.equals(setText)){
+                textLength = doc.getLength();
+                characterCount.setText(textLength + " / 120 Characters");
+            }
         }
 
         public void changedUpdate(DocumentEvent e) {
             Document doc = e.getDocument();
-            textLength = doc.getLength();
-            characterCount.setText(textLength + " / 120 Characters");
+            Object area = doc.getProperty("Area");
+            if(area.equals(setBillboardName)){
+                nameChars = doc.getLength();
+                nameCount.setText(nameChars + " / 50 Characters");
+            } else if (area.equals(setText)){
+                textLength = doc.getLength();
+                characterCount.setText(textLength + " / 120 Characters");
+            }
         }
     }
 
