@@ -2,7 +2,9 @@ package BillboardServer;
 
 import Helper.Billboard;
 import Helper.Password;
+import Helper.Requests.CreateUserRequest;
 import Helper.Requests.LoginRequest;
+import Helper.Requests.SetUserPermissionsRequest;
 import Helper.Responses.ErrorMessage;
 import Helper.ScheduledBillboard;
 import jdk.jfr.Timespan;
@@ -146,7 +148,70 @@ public class Evaluate {
         return false;
     }
 
+    public static Object EvaluateCreateUser(Connection con, CreateUserRequest request) throws Exception {
+        String sql = String.format("INSERT INTO users (Name, Password) VALUES ('%s', '%s');", request.getUserName(), Password.getSaltedHash(request.getHashedPassword()));
+
+        try {
+            Statement statement = con.createStatement();
+
+            statement.executeQuery(sql);
+
+            if (request.getPermissions().size() > 0) {
+                String permissionSQL = "INSERT INTO user_permissions (UserName, PermissionName) VALUES";
+
+                for (String permission : request.getPermissions()){
+                    if (permission != request.getPermissions().getFirst()){
+                        permissionSQL = permissionSQL.concat(",");
+                    }
+                    permissionSQL = permissionSQL.concat(String.format(" ('%s', '%s')", request.getUserName(), permission));
+                }
+
+                permissionSQL = permissionSQL.concat(";");
+
+                statement.executeQuery(permissionSQL);
+            }
+
+            return true;
+        }
+        catch (SQLException e){
+            if (e.getMessage().contains("Duplicate entry")) {
+                return new ErrorMessage("User already exists!");
+            }
+            return new ErrorMessage(e.getMessage());
+        }
+    }
+
     private static String EscapeString(String input){
         return input.replace("\"", "\\\"").replace("'", "''");
+    }
+
+    public static Object EvaluateSetUserPermissions(Connection con, SetUserPermissionsRequest request) {
+        String sql = String.format("DELETE FROM user_permissions WHERE UserName = '%s';", request.getUserName());
+
+        try {
+            Statement statement = con.createStatement();
+
+            statement.execute(sql);
+
+            if (request.getPermissions().size() > 0) {
+                sql = "INSERT INTO user_permissions (UserName, PermissionName) VALUES";
+
+                for (String permission : request.getPermissions()){
+                    if (permission != request.getPermissions().getFirst()){
+                        sql = sql.concat(",");
+                    }
+                    sql = sql.concat(String.format(" ('%s', '%s')", request.getUserName(), permission));
+                }
+
+                sql = sql.concat(";");
+
+                statement.executeQuery(sql);
+            }
+
+            return true;
+        }
+        catch (SQLException e){
+            return new ErrorMessage(e.getMessage());
+        }
     }
 }

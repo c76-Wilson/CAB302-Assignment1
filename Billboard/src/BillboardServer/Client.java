@@ -11,20 +11,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 
 public class Client {
-    public static void main(String args[]){
-        try {
 
-            TestGetCurrentBillboard();
-            TestLoginAndSchedule();
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
-
-    private static void TestGetCurrentBillboard() throws Exception{
+    public void TestGetCurrentBillboard() throws Exception {
         CurrentBillboardRequest request = new CurrentBillboardRequest();
         Socket socket = new Socket("127.0.0.1", 4444);
 
@@ -33,10 +24,10 @@ public class Client {
         output.writeObject(request);
 
         ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
-        String xml = (String)clientInputStream.readObject();
+        String xml = (String) clientInputStream.readObject();
     }
 
-    private static void TestLoginAndSchedule() throws Exception{
+    public String TestLogin() throws Exception {
         LoginRequest request = new LoginRequest("admin", Password.hash("root"));
         Socket socket = new Socket("127.0.0.1", 4444);
 
@@ -47,57 +38,90 @@ public class Client {
         ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
         Object obj = clientInputStream.readObject();
 
-        if (obj.getClass() == String.class){
-
-            String sessionToken = (String)obj;
-
-            Socket socket1 = new Socket("127.0.0.1", 4444);
-
-            CreateEditBillboardRequest createEditBillboardRequest = new CreateEditBillboardRequest(sessionToken, "Test", new String(Files.readAllBytes(Paths.get("src\\BillboardServer\\error.xml"))));
-
-            output = new ObjectOutputStream(socket1.getOutputStream());
-
-            output.writeObject(createEditBillboardRequest);
-
-            clientInputStream = new ObjectInputStream(socket1.getInputStream());
-            Object createObject = clientInputStream.readObject();
-
-            if (obj.getClass() == String.class){
-                Socket socket2 = new Socket("127.0.0.1", 4444);
-
-                ScheduleBillboardRequest scheduleBillboardRequest = new ScheduleBillboardRequest("Test", LocalDateTime.now().plusHours(1), Duration.ofMinutes(30), sessionToken);
-
-                output = new ObjectOutputStream(socket2.getOutputStream());
-
-                output.writeObject(scheduleBillboardRequest);
-
-                clientInputStream = new ObjectInputStream(socket2.getInputStream());
-                Object scheduleObject = clientInputStream.readObject();
-
-                if (obj.getClass() == String.class){
-                    Socket socket3 = new Socket("127.0.0.1", 4444);
-
-                    ViewScheduleRequest viewScheduleRequest = new ViewScheduleRequest(sessionToken);
-
-                    output = new ObjectOutputStream(socket3.getOutputStream());
-
-                    output.writeObject(viewScheduleRequest);
-
-                    clientInputStream = new ObjectInputStream(socket3.getInputStream());
-                    Object viewObject = clientInputStream.readObject();
-                }
-                else if (obj.getClass() == ErrorMessage.class){
-                    System.out.println(((ErrorMessage)obj).getErrorMessage());
-                }
-            }
-            else if (obj.getClass() == ErrorMessage.class){
-                System.out.println(((ErrorMessage)obj).getErrorMessage());
-            }
-
-
+        if (obj.getClass() == String.class) {
+            return (String)obj;
         }
-        else if (obj.getClass() == ErrorMessage.class){
-            System.out.println(((ErrorMessage)obj).getErrorMessage());
-        }
+
+        return "";
+    }
+
+    public void TestCreateBillboard(String sessionToken) throws Exception {
+        Socket socket = new Socket("127.0.0.1", 4444);
+
+        CreateEditBillboardRequest createEditBillboardRequest = new CreateEditBillboardRequest(sessionToken, "Test", new String(Files.readAllBytes(Paths.get("src\\BillboardServer\\error.xml"))));
+
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+
+        output.writeObject(createEditBillboardRequest);
+
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+
+        Object createObject = clientInputStream.readObject();
+    }
+
+    public void TestScheduleBillboard(String sessionToken) throws Exception {
+        Socket socket = new Socket("127.0.0.1", 4444);
+
+        ScheduleBillboardRequest scheduleBillboardRequest = new ScheduleBillboardRequest("Test", LocalDateTime.now().plusHours(1), Duration.ofMinutes(30), sessionToken);
+
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+
+        output.writeObject(scheduleBillboardRequest);
+
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+        Object scheduleObject = clientInputStream.readObject();
+    }
+
+    public void TestViewSchedule(String sessionToken) throws Exception {
+        Socket socket = new Socket("127.0.0.1", 4444);
+
+        ViewScheduleRequest viewScheduleRequest = new ViewScheduleRequest(sessionToken);
+
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+
+        output.writeObject(viewScheduleRequest);
+
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+        Object viewObject = clientInputStream.readObject();
+    }
+
+    public void TestCreateUser(String sessionToken) throws Exception {
+        Socket socket = new Socket("127.0.0.1", 4444);
+
+        LinkedList<String> permissions = new LinkedList<>();
+
+        permissions.add("Create Billboard");
+        permissions.add("Edit Billboard");
+        permissions.add("Schedule Billboard");
+        permissions.add("Edit Users");
+
+        CreateUserRequest createUserRequest = new CreateUserRequest("Test User", permissions, Password.hash("password"), sessionToken);
+
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+
+        output.writeObject(createUserRequest);
+
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+
+        Object createObject = clientInputStream.readObject();
+    }
+
+    public void TestSetUserPermissions(String sessionToken) throws Exception {
+        Socket socket = new Socket("127.0.0.1", 4444);
+
+        LinkedList<String> permissions = new LinkedList<>();
+
+        permissions.add("Create Billboard");
+        permissions.add("Edit Users");
+
+        SetUserPermissionsRequest setUserPermissionsRequest = new SetUserPermissionsRequest("Test User", permissions, sessionToken);
+
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+
+        output.writeObject(setUserPermissionsRequest);
+
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+
+        Object createObject = clientInputStream.readObject();
     }
 }

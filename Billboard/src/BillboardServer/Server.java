@@ -11,10 +11,24 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class Server {
+public class Server implements Runnable {
 
-    static int port;
-    static List<SessionToken> sessionTokens;
+    static int port = getServerPort();
+    Connection con;
+    Socket currentSocket;
+    static List<SessionToken> sessionTokens = new LinkedList<>();
+
+    Server(Socket currentSocket){
+        this.currentSocket = currentSocket;
+
+        Properties properties = new Properties();
+        try{
+            properties = getDBProperties();
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+        this.con = ConnectToDatabase.connect(properties.getProperty("jdbc.url"), properties.getProperty("jdbc.schema"), properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
+    }
 
     public static void main(String args[]){
         try {
@@ -25,36 +39,31 @@ public class Server {
     }
 
     public static void runServer() throws Exception {
-        Properties properties = new Properties();
-        try{
-            properties = getDBProperties();
-        } catch (IOException e) {
-            System.out.println(e);
+        port = getServerPort();
+
+        ServerSocket serverSocket = new ServerSocket(port);
+
+        for (; ; ) {
+            Socket socket = serverSocket.accept();
+
+            System.out.println(socket.getInetAddress() + " connected to server!");
+
+            new Thread(new Server(socket)).start();
         }
+    }
 
-        if (properties != null) {
-            Connection con = ConnectToDatabase.connect(properties.getProperty("jdbc.url"), properties.getProperty("jdbc.schema"), properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
+    public void run(){
+        try {
+            ObjectInputStream objInputStream = new ObjectInputStream(currentSocket.getInputStream());
+            Request request = (Request) objInputStream.readObject();
 
-            port = getServerPort();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(currentSocket.getOutputStream());
+            objectOutputStream.writeObject(evaluateRequest(request, con));
 
-            ServerSocket serverSocket = new ServerSocket(port);
+            currentSocket.close();
+        }
+        catch (Exception e){
 
-            // Assign list of session tokens
-            sessionTokens = new LinkedList<>();
-
-            for(;;){
-                Socket socket = serverSocket.accept();
-
-                System.out.println(socket.getInetAddress() + " connected to server!");
-
-                ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
-                Request request = (Request)objInputStream.readObject();
-
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-                objectOutputStream.writeObject(evaluateRequest(request, con));
-
-                socket.close();
-            }
         }
     }
 
@@ -81,7 +90,7 @@ public class Server {
         return null;
     }
 
-    public static int getServerPort() throws IOException{
+    public static int getServerPort(){
         try{
             Properties properties = new Properties();
 
@@ -229,6 +238,41 @@ public class Server {
         }
         // If create user request
         else if (request.getClass() == CreateUserRequest.class){
+            CreateUserRequest userRequest = (CreateUserRequest)request;
+            // Check session token
+            if (checkSessionToken(userRequest.getSessionToken())){
+                // Check permissions
+                LinkedList<String> permissions = new LinkedList<String>();
+                permissions.add("Edit Users");
+
+                if (checkPermissions(con, getSessionToken(userRequest.getSessionToken()), permissions)){
+                    return Evaluate.EvaluateCreateUser(con, userRequest);
+                }
+            }
+            else{
+                return new ErrorMessage("Invalid session token!");
+            }
+        }
+        // If get permissions request
+        else if (request.getClass() == GetUserPermissionsRequest.class){
+
+        }
+        // If set user permissions request
+        else if (request.getClass() == SetUserPermissionsRequest.class){
+            SetUserPermissionsRequest setPermissionsRequest = (SetUserPermissionsRequest)request;
+            // Check Session Token
+            if (checkSessionToken(setPermissionsRequest.getSessionToken())) {
+                // Check for Edit Users permission
+                LinkedList<String> permissions = new LinkedList<>();
+                permissions.add("Edit Users");
+
+                if (checkPermissions(con, getSessionToken(setPermissionsRequest.getSessionToken()), permissions)){
+                    return Evaluate.EvaluateSetUserPermissions(con, setPermissionsRequest);
+                }
+            }
+        }
+        // If set user password request
+        else if (request.getClass() == SetUserPasswordRequest.class){
 
         }
         return null;
