@@ -133,7 +133,6 @@ public class ControlFrame implements ActionListener {
     private boolean repeatDay = false;
     private boolean repeatHour = false;
     private String testDateTime = "";
-    private int duration;
 
     //Create dummy JLabel
     private JLabel filler;
@@ -152,16 +151,6 @@ public class ControlFrame implements ActionListener {
                     "(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$";
 
     private static final Pattern datePattern = Pattern.compile(dateRegex);
-
-    public ControlFrame(String title, boolean loginTrue){
-        if(loginTrue){
-            frame = new JFrame(title);
-            frame.setSize(1280, 720);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setupProcessForm();
-            frame.setVisible(true);
-        }
-    }
 
     public ControlFrame (String title){
         frame = new JFrame(title);
@@ -227,11 +216,11 @@ public class ControlFrame implements ActionListener {
             } else if(repeatHour == true){
                 repeatMins = 60;
             } else {
-
+                repeatMins = (Integer) repetitionMins.getValue();
             }
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
             LocalDateTime scheduleTime = LocalDateTime.parse(testDateTime, formatter);
-            Duration dur = Duration.ofMinutes(duration);
+            Duration dur = Duration.ofMinutes(durMins);
             Duration rep = Duration.ofMinutes(repeatMins);
             ScheduleBillboardRequest billboard;
             if(repeatMins > 0){
@@ -450,6 +439,7 @@ public class ControlFrame implements ActionListener {
         repetitionModel = new SpinnerNumberModel(repeatMins, durMins + 1, 59, 1);
         repetitionMins = new JSpinner(repetitionModel);
         repetitionMins.setEnabled(false);
+        repetitionMins.setValue(0);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 4;
         grid.gridy = 7;
@@ -1070,7 +1060,11 @@ public class ControlFrame implements ActionListener {
             userLabel = null;
             panel = null;
             frame.dispose();
-            new ControlFrame("Billboard Control Panel", true);
+            frame = new JFrame("Billboard Control Panel");
+            frame.setSize(1280, 720);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+            setupProcessForm();
         } else if (loginPass == false) {
             if(failedLogin == null){
                 failedLogin = new JLabel("Incorrect Username or Password");
