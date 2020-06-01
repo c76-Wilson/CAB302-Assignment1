@@ -18,11 +18,11 @@ public class Server implements Runnable {
     Socket currentSocket;
     static List<SessionToken> sessionTokens = new LinkedList<>();
 
-    Server(Socket currentSocket){
+    Server(Socket currentSocket) {
         this.currentSocket = currentSocket;
 
         Properties properties = new Properties();
-        try{
+        try {
             properties = getDBProperties();
         } catch (IOException e) {
             System.out.println(e);
@@ -30,7 +30,7 @@ public class Server implements Runnable {
         this.con = ConnectToDatabase.connect(properties.getProperty("jdbc.url"), properties.getProperty("jdbc.schema"), properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
     }
 
-    public static void main(String args[]){
+    public static void main(String args[]) {
         try {
             runServer();
         } catch (Exception e) {
@@ -52,7 +52,7 @@ public class Server implements Runnable {
         }
     }
 
-    public void run(){
+    public void run() {
         try {
             ObjectInputStream objInputStream = new ObjectInputStream(currentSocket.getInputStream());
             Request request = (Request) objInputStream.readObject();
@@ -61,14 +61,13 @@ public class Server implements Runnable {
             objectOutputStream.writeObject(evaluateRequest(request, con));
 
             currentSocket.close();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
 
-    public static Properties getDBProperties() throws IOException{
-        try{
+    public static Properties getDBProperties() throws IOException {
+        try {
             Properties properties = new Properties();
 
             String propFileName = "db.props";
@@ -82,16 +81,15 @@ public class Server implements Runnable {
             }
 
             return properties;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
         }
 
         return null;
     }
 
-    public static int getServerPort(){
-        try{
+    public static int getServerPort() {
+        try {
             Properties properties = new Properties();
 
             String propFileName = "server.props";
@@ -105,8 +103,7 @@ public class Server implements Runnable {
             }
 
             return Integer.parseInt(properties.getProperty("port"));
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
         }
 
@@ -115,45 +112,43 @@ public class Server implements Runnable {
 
     public static Object evaluateRequest(Request request, Connection con) throws Exception {
         // If current billboard request
-        if (request.getClass() == CurrentBillboardRequest.class){
+        if (request.getClass() == CurrentBillboardRequest.class) {
             Object obj = Evaluate.EvaluateCurrentBillboard(con);
 
             if (obj.getClass() == Billboard.class) {
-                return ((Billboard)obj).getXml();
-            }
-            else{
+                return ((Billboard) obj).getXml();
+            } else {
                 return obj;
             }
         }
         // If login request
-        else if (request.getClass() == LoginRequest.class){
-            Object obj = Evaluate.EvaluateLogin(con, (LoginRequest)request);
+        else if (request.getClass() == LoginRequest.class) {
+            Object obj = Evaluate.EvaluateLogin(con, (LoginRequest) request);
 
             // Add to session token list if object type is session token
-            if (obj.getClass() == SessionToken.class){
-                sessionTokens.add((SessionToken)obj);
+            if (obj.getClass() == SessionToken.class) {
+                sessionTokens.add((SessionToken) obj);
 
-                return ((SessionToken)obj).getSessionToken();
+                return ((SessionToken) obj).getSessionToken();
             }
 
             return obj;
         }
         // If list billboards request
-        else if (request.getClass() == ListBillboardsRequest.class){
-            if (checkSessionToken(((ListBillboardsRequest)request).getSessionToken())){
+        else if (request.getClass() == ListBillboardsRequest.class) {
+            if (checkSessionToken(((ListBillboardsRequest) request).getSessionToken())) {
 
-            }
-            else{
+            } else {
                 return new ErrorMessage("Invalid session token!");
             }
         }
         // If get billboard info request
-        else if (request.getClass() == GetBillboardRequest.class){
+        else if (request.getClass() == GetBillboardRequest.class) {
 
         }
         // If create/edit billboard request
-        else if (request.getClass() == CreateEditBillboardRequest.class){
-            CreateEditBillboardRequest actualRequest = (CreateEditBillboardRequest)request;
+        else if (request.getClass() == CreateEditBillboardRequest.class) {
+            CreateEditBillboardRequest actualRequest = (CreateEditBillboardRequest) request;
 
             // Grab actual session token & check if valid
             if (checkSessionToken(actualRequest.getSessionToken())) {
@@ -168,10 +163,9 @@ public class Server implements Runnable {
                 if (obj.getClass() == Billboard.class) {
                     Billboard billboard = (Billboard) obj;
 
-                    if (!billboard.getCreatorName().equals(sessionToken.getUserName()) || (Evaluate.EvaluateCurrentBillboard(con).getClass() == Billboard.class && (Billboard) Evaluate.EvaluateCurrentBillboard(con) == billboard)){
+                    if (!billboard.getCreatorName().equals(sessionToken.getUserName()) || (Evaluate.EvaluateCurrentBillboard(con).getClass() == Billboard.class && (Billboard) Evaluate.EvaluateCurrentBillboard(con) == billboard)) {
                         permissionsRequired.add("Edit Billboard");
-                    }
-                    else{
+                    } else {
                         permissionsRequired.add("Create Billboard");
                     }
                 }
@@ -181,107 +175,150 @@ public class Server implements Runnable {
                 }
 
                 // Check if user has required permissions
-                if (checkPermissions(con, sessionToken, permissionsRequired)){
+                if (checkPermissions(con, sessionToken, permissionsRequired)) {
                     // Run insert or update
                     Evaluate.EvaluateCreateEditBillboard(con, new Billboard(actualRequest.getBillboardName(), actualRequest.getBillboardContents(), sessionToken.getUserName()));
-                }
-                else{
+                } else {
                     return new ErrorMessage("Insufficient permissions");
                 }
+            } else {
+                return new ErrorMessage("Invalid session token!");
             }
         }
         // If delete billboard request
-        else if (request.getClass() == DeleteBillboardRequest.class){
+        else if (request.getClass() == DeleteBillboardRequest.class) {
 
         }
         // If view schedule request
-        else if (request.getClass() == ViewScheduleRequest.class){
-            ViewScheduleRequest scheduleRequest = (ViewScheduleRequest)request;
+        else if (request.getClass() == ViewScheduleRequest.class) {
+            ViewScheduleRequest scheduleRequest = (ViewScheduleRequest) request;
             // Check session token
-            if (checkSessionToken(scheduleRequest.getSessionToken())){
+            if (checkSessionToken(scheduleRequest.getSessionToken())) {
                 // Check permissions
                 LinkedList<String> permissions = new LinkedList<String>();
                 permissions.add("Schedule Billboard");
 
-                if (checkPermissions(con, getSessionToken(scheduleRequest.getSessionToken()), permissions)){
+                if (checkPermissions(con, getSessionToken(scheduleRequest.getSessionToken()), permissions)) {
                     return Evaluate.EvaluateViewSchedule(con);
                 }
-            }
-            else{
+            } else {
                 return new ErrorMessage("Invalid session token!");
             }
         }
         // If schedule billboard request
-        else if (request.getClass() == ScheduleBillboardRequest.class){
-            ScheduleBillboardRequest scheduleRequest = (ScheduleBillboardRequest)request;
+        else if (request.getClass() == ScheduleBillboardRequest.class) {
+            ScheduleBillboardRequest scheduleRequest = (ScheduleBillboardRequest) request;
             // Check session token
-            if (checkSessionToken(scheduleRequest.getSessionToken())){
+            if (checkSessionToken(scheduleRequest.getSessionToken())) {
                 // Check permissions
                 LinkedList<String> permissions = new LinkedList<String>();
                 permissions.add("Schedule Billboard");
 
-                if (checkPermissions(con, getSessionToken(scheduleRequest.getSessionToken()), permissions)){
+                if (checkPermissions(con, getSessionToken(scheduleRequest.getSessionToken()), permissions)) {
                     return Evaluate.EvaluateScheduleBillboard(con, scheduleRequest.getBillboardName(), scheduleRequest.getScheduleTime(), scheduleRequest.getDuration(), scheduleRequest.getRecurring(), getSessionToken(scheduleRequest.getSessionToken()).getUserName());
+                } else {
+                    return new ErrorMessage("Insufficient permissions!");
                 }
-            }
-            else{
+            } else {
                 return new ErrorMessage("Invalid session token!");
             }
         }
         // If remove billboard from schedule request
-        else if (request.getClass() == RemoveFromScheduleRequest.class){
+        else if (request.getClass() == RemoveFromScheduleRequest.class) {
 
         }
         // If list users request
-        else if (request.getClass() == ListUsersRequest.class){
+        else if (request.getClass() == ListUsersRequest.class) {
+            ListUsersRequest listUsersRequest = (ListUsersRequest) request;
+            // Check session token
+            if (checkSessionToken(listUsersRequest.getSessionToken())) {
+                // Check requester has 'Edit Users' permission
+                LinkedList<String> userPermissions = new LinkedList<>();
+                userPermissions.add("Edit Users");
 
+                if (checkPermissions(con, getSessionToken(listUsersRequest.getSessionToken()), userPermissions)) {
+                    // Evaluate and run SQL - return result (either ErrorMessage or list of users
+                    return Evaluate.EvaluateListUsers(con);
+                } else {
+                    return new ErrorMessage("Insufficient permissions!");
+                }
+            } else {
+                return new ErrorMessage("Invalid session token!");
+            }
         }
         // If create user request
-        else if (request.getClass() == CreateUserRequest.class){
-            CreateUserRequest userRequest = (CreateUserRequest)request;
+        else if (request.getClass() == CreateUserRequest.class) {
+            CreateUserRequest userRequest = (CreateUserRequest) request;
             // Check session token
-            if (checkSessionToken(userRequest.getSessionToken())){
+            if (checkSessionToken(userRequest.getSessionToken())) {
                 // Check permissions
                 LinkedList<String> permissions = new LinkedList<String>();
                 permissions.add("Edit Users");
 
-                if (checkPermissions(con, getSessionToken(userRequest.getSessionToken()), permissions)){
+                if (checkPermissions(con, getSessionToken(userRequest.getSessionToken()), permissions)) {
                     return Evaluate.EvaluateCreateUser(con, userRequest);
+                } else {
+                    return new ErrorMessage("Insufficient permissions!");
                 }
-            }
-            else{
+            } else {
                 return new ErrorMessage("Invalid session token!");
             }
         }
         // If get permissions request
-        else if (request.getClass() == GetUserPermissionsRequest.class){
+        else if (request.getClass() == GetUserPermissionsRequest.class) {
 
         }
         // If set user permissions request
-        else if (request.getClass() == SetUserPermissionsRequest.class){
-            SetUserPermissionsRequest setPermissionsRequest = (SetUserPermissionsRequest)request;
+        else if (request.getClass() == SetUserPermissionsRequest.class) {
+            SetUserPermissionsRequest setPermissionsRequest = (SetUserPermissionsRequest) request;
             // Check Session Token
             if (checkSessionToken(setPermissionsRequest.getSessionToken())) {
                 // Check for Edit Users permission
                 LinkedList<String> permissions = new LinkedList<>();
                 permissions.add("Edit Users");
 
-                if (checkPermissions(con, getSessionToken(setPermissionsRequest.getSessionToken()), permissions)){
+                if (checkPermissions(con, getSessionToken(setPermissionsRequest.getSessionToken()), permissions)) {
                     return Evaluate.EvaluateSetUserPermissions(con, setPermissionsRequest);
+                } else {
+                    return new ErrorMessage("Insufficient permissions!");
                 }
+            } else {
+                return new ErrorMessage("Invalid session token!");
             }
         }
         // If set user password request
-        else if (request.getClass() == SetUserPasswordRequest.class){
+        else if (request.getClass() == SetUserPasswordRequest.class) {
+            SetUserPasswordRequest setUserPasswordRequest = (SetUserPasswordRequest) request;
+            // Check Session token
+            if (checkSessionToken(setUserPasswordRequest.getSessionToken())) {
+                LinkedList<String> userPermissions = new LinkedList<>();
+                // Decide what permissions are required
+                if (setUserPasswordRequest.getUserName() == getSessionToken(setUserPasswordRequest.getSessionToken()).getUserName()) {
+                    // If setting own password - no required permissions
+                } else {
+                    // Else 'Edit Users' required
+                    userPermissions.add("Edit Users");
+                }
 
+                // Check permissions
+                if (checkPermissions(con, getSessionToken(setUserPasswordRequest.getSessionToken()), userPermissions)){
+                    // Evaluate request and return result
+                    return Evaluate.EvaluateSetUserPassword(con, setUserPasswordRequest);
+                }
+                else {
+                    return new ErrorMessage("Insufficient permissions!");
+                }
+            } else {
+                return new ErrorMessage("Invalid session token!");
+            }
         }
         return null;
     }
 
-    public static SessionToken getSessionToken(String token){
+    public static SessionToken getSessionToken(String token) {
         // Gets a session token object from the string
-        for (SessionToken sessionToken : sessionTokens){
-            if (sessionToken.getSessionToken().equals(token)){
+        for (SessionToken sessionToken : sessionTokens) {
+            if (sessionToken.getSessionToken().equals(token)) {
                 return sessionToken;
             }
         }
@@ -289,49 +326,53 @@ public class Server implements Runnable {
         return null;
     }
 
-    public static boolean checkSessionToken(String token){
+    public static boolean checkSessionToken(String token) {
         // Check sessionTokens list for token and update last used if found
         SessionToken sessionToken = getSessionToken(token);
 
-        if (sessionToken != null && (sessionToken.getLastUsed().isAfter(LocalDateTime.now().minusHours(24)))){
+        if (sessionToken != null && sessionToken.getLastUsed().isAfter(LocalDateTime.now().minusHours(24))) {
             sessionToken.setLastUsed(LocalDateTime.now());
             return true;
+        }
+        else if (sessionToken != null && sessionToken.getLastUsed().isBefore(LocalDateTime.now().minusHours(24))){
+            // If session token is older than 24hrs - delete it from list (conserve memory)
+            sessionTokens.remove(sessionToken);
         }
 
         // Return false if not found in list
         return false;
     }
 
-    public static boolean checkPermissions(Connection con, SessionToken token, LinkedList<String> requiredPermissions) throws Exception{
+    public static boolean checkPermissions(Connection con, SessionToken token, LinkedList<String> requiredPermissions) throws Exception {
         // Check if user associated with session token has required permissions
         // Check permissions table to see if required permissions exist
-        Statement statement = con.createStatement();
+        if (requiredPermissions.size() > 0) {
+            Statement statement = con.createStatement();
 
-        String sql = String.format("SELECT * FROM user_permissions WHERE `UserName` = \"%s\" AND", token.getUserName());
+            String sql = String.format("SELECT * FROM user_permissions WHERE `UserName` = \"%s\" AND", token.getUserName());
 
-        for (String permission : requiredPermissions){
-            if (permission != requiredPermissions.getFirst()){
-                sql = sql.concat(" OR");
+            for (String permission : requiredPermissions) {
+                if (permission != requiredPermissions.getFirst()) {
+                    sql = sql.concat(" OR");
+                } else {
+                    sql = sql.concat(" (");
+                }
+
+                sql = sql.concat(String.format(" `PermissionName` = \"%s\"", permission));
+
+                if (permission == requiredPermissions.getLast()) {
+                    sql = sql.concat(");");
+                }
             }
-            else {
-                sql = sql.concat(" (");
-            }
 
-            sql = sql.concat(String.format(" `PermissionName` = \"%s\"", permission));
+            ResultSet userResult = statement.executeQuery(sql);
 
-            if (permission == requiredPermissions.getLast()){
-                sql = sql.concat(");");
+            if (userResult.last()) {
+                if (userResult.getRow() == requiredPermissions.size()) {
+                    return true;
+                }
             }
         }
-
-        ResultSet userResult = statement.executeQuery(sql);
-
-        if (userResult.last()){
-            if (userResult.getRow() == requiredPermissions.size()) {
-                return true;
-            }
-        }
-
         return false;
     }
 }
