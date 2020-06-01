@@ -218,7 +218,7 @@ public class ControlFrame implements ActionListener {
             } else {
                 repeatMins = (Integer) repetitionMins.getValue();
             }
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             LocalDateTime scheduleTime = LocalDateTime.parse(testDateTime, formatter);
             Duration dur = Duration.ofMinutes(durMins);
             Duration rep = Duration.ofMinutes(repeatMins);
@@ -272,37 +272,43 @@ public class ControlFrame implements ActionListener {
         try{
             if(hour < 10){
                 if(minute < 10){
-                    if(meridiem){
-                        testDateTime = testDate + " 0" + hour + ":0" + minute + " pm";
-                    } else if (!meridiem){
-                        testDateTime = testDate + " 0" + hour + ":0" + minute + " am";
-                    }
+                    testDateTime = testDate + " 0" + hour + ":0" + minute;
                 } else if (minute >= 10){
-                    if(meridiem){
-                        testDateTime = testDate + " 0" + hour + ":" + minute + " pm";
-                    } else if (!meridiem){
-                        testDateTime = testDate + " 0" + hour + ":" + minute + " am";
-                    }
+                    testDateTime = testDate + " 0" + hour + ":" + minute;
                 }
-            } else if (hour >= 10){
+            } else if (hour >= 10 && hour < 12){
                 if(minute < 10){
                     if(meridiem){
-                        testDateTime = testDate + " " + hour + ":0" + minute + " pm";
+                        testDateTime = testDate + " " + (hour + 12) + ":0" + minute;
                     } else if (!meridiem){
-                        testDateTime = testDate + " " + hour + ":0" + minute + " am";
+                        testDateTime = testDate + " " + hour + ":0" + minute;
                     }
                 } else if (minute >= 10){
                     if(meridiem){
-                        testDateTime = testDate + " " + hour + ":" + minute + " pm";
+                        testDateTime = testDate + " " + (hour + 12) + ":" + minute;
                     } else if (!meridiem){
-                        testDateTime = testDate + " " + hour + ":" + minute + " am";
+                        testDateTime = testDate + " " + hour + ":" + minute;
+                    }
+                }
+            } else if (hour == 12){
+                if(minute < 10){
+                    if(meridiem){
+                        testDateTime = testDate + " " + hour + ":0" + minute;
+                    } else if (!meridiem){
+                        testDateTime = testDate + " " +  "00:0" + minute;
+                    }
+                } else if (minute >= 10){
+                    if(meridiem){
+                        testDateTime = testDate + " " + hour + ":" + minute;
+                    } else if (!meridiem){
+                        testDateTime = testDate + " " + "00:" + minute;
                     }
                 }
             }
             LocalDateTime today = LocalDateTime.now();
-            DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             String todayDate = today.format(format);
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             Date inputDate = sdf.parse(testDateTime);
             Date checkDate = sdf.parse(todayDate);
             if(inputDate.before(checkDate)){
