@@ -1,5 +1,8 @@
 package BillboardViewer;
 
+import Helper.Password;
+import Helper.Requests.CurrentBillboardRequest;
+import Helper.Requests.LoginRequest;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -36,6 +39,7 @@ public class Billboard_Viewer extends JFrame implements Runnable {
     int num_panels = 0;
     boolean pic_created,msg_created,info_created;
     boolean server_error_g = false;
+    public String server_xml;
 
 
     //window variables
@@ -45,11 +49,13 @@ public class Billboard_Viewer extends JFrame implements Runnable {
     Dimension window = new Dimension(WIDTH,HEIGHT);
 
 
-    public Billboard_Viewer(String name,boolean server_error) throws IOException {
+    public Billboard_Viewer(String name,boolean server_error,String xml) throws IOException {
         //set title
         super(name);
-        if(!server_error) run();
-        else server_error_g = true;run();
+        if(!server_error){server_xml=xml; run();}
+        else
+        {server_error_g = true;
+        run();}
 
 
     }
@@ -82,8 +88,8 @@ public class Billboard_Viewer extends JFrame implements Runnable {
 
 
         //parse control file and ascertain information to display
-        parseControlFile("src\\BillboardViewer\\control.xml");
-
+        if(server_error_g) parseControlFile("src\\BillboardViewer\\control.xml",true);
+        else{parseControlFile(server_xml,false);};
 
 
         layoutPanels();
@@ -196,10 +202,25 @@ public class Billboard_Viewer extends JFrame implements Runnable {
 
     }
 
+    private File stringXMLtofileXML(String xml) throws IOException {
+        File newFile = new File("serverXML.txt");
+        newFile.createNewFile();
+        FileWriter fw = new FileWriter(newFile,false);
+        fw.write(xml);
+        fw.close();
+        return newFile;
+    }
+
+
+
     //method to parse an xml file ton determine the properties of the billboard
-    public void parseControlFile(String file_path) throws IOException, ParserConfigurationException, SAXException {
+    public void parseControlFile(String file_path,boolean local) throws IOException, ParserConfigurationException, SAXException {
         //initialize file and initialize documentBuilder to parse the xml file into an accessible format
-        File xmlFile = new File(file_path);
+        File xmlFile = null;
+        if(local){ xmlFile = new File(file_path);}
+        else{
+            xmlFile = stringXMLtofileXML(server_xml);
+        }
         DocumentBuilderFactory builderFac = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = builderFac.newDocumentBuilder();
 
@@ -495,23 +516,44 @@ public class Billboard_Viewer extends JFrame implements Runnable {
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-
-        boolean is_billboard = false;
-        try{ is_billboard = serverRetreival(); }
-        catch(IOException e) { e.printStackTrace();}
+        //init bool and jFrame
+        String bill = null;
+        JFrame x = null;
+        //test server connection
+        try{ bill = serverRetreival(); }
+        catch(Exception e) { e.printStackTrace();}
 
         while(true)
         {
-            if(is_billboard)
+
+            try{ bill = serverRetreival(); }
+            catch(Exception e) { e.printStackTrace();}
+            //if instance already active
+            if(x!=null)
             {
-                try{ is_billboard = serverRetreival(); }
-                catch(IOException e) { e.printStackTrace();}
-                JFrame x = new Billboard_Viewer("Test",false);
-                if(!is_billboard){x.dispose();}
+                //temp instance
+                JFrame e = null;
+                if(bill==null)
+                {
+                    e = new Billboard_Viewer("Error Screen",true,"");
+                }
+                else
+                {
+                    e = new Billboard_Viewer("Billboard Viewer",false,bill );
+
+                }
+                //copy new billboard
+                x = e;
+                //delete temp
+                e.dispose();
             }
-            else{
-                JFrame x = new Billboard_Viewer("Test",false);
-                if(!is_billboard){x.dispose();}
+            else {
+                if (bill == null) {
+                    x = new Billboard_Viewer("Error Screen", true, "");
+                } else {
+                    x = new Billboard_Viewer("Billboard Viewer", false, bill);
+
+                }
             }
             Thread.sleep(15000);
         }
@@ -521,13 +563,21 @@ public class Billboard_Viewer extends JFrame implements Runnable {
     }
 
 
-    public static boolean serverRetreival() throws IOException, ClassNotFoundException {
-        Socket socket = new Socket("localhost",12345);
-        ObjectInputStream test_stream = new ObjectInputStream(socket.getInputStream());
-        String xml = test_stream.readUTF();
-         return true;
+    public static String serverRetreival() throws Exception {
 
+        CurrentBillboardRequest request = new CurrentBillboardRequest();
+        Socket socket = new Socket("127.0.0.1", 4444);
 
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+
+        output.writeObject(request);
+
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+        String xml = (String)clientInputStream.readObject();
+
+        return xml;
+
+        
     }
 
 }
