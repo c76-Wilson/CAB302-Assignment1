@@ -2,11 +2,10 @@ package BillboardServer;
 
 import Helper.Billboard;
 import Helper.Password;
-import Helper.Requests.CreateUserRequest;
-import Helper.Requests.LoginRequest;
-import Helper.Requests.SetUserPermissionsRequest;
+import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
 import Helper.ScheduledBillboard;
+import Helper.User;
 import jdk.jfr.Timespan;
 
 import java.nio.file.Files;
@@ -149,13 +148,16 @@ public class Evaluate {
     }
 
     public static Object EvaluateCreateUser(Connection con, CreateUserRequest request) throws Exception {
+        // Generate query to add user
         String sql = String.format("INSERT INTO users (Name, Password) VALUES ('%s', '%s');", request.getUserName(), Password.getSaltedHash(request.getHashedPassword()));
 
         try {
+            // Insert user
             Statement statement = con.createStatement();
 
             statement.executeQuery(sql);
 
+            // Generate permissions SQL
             if (request.getPermissions().size() > 0) {
                 String permissionSQL = "INSERT INTO user_permissions (UserName, PermissionName) VALUES";
 
@@ -171,6 +173,7 @@ public class Evaluate {
                 statement.executeQuery(permissionSQL);
             }
 
+            // Return true if successful
             return true;
         }
         catch (SQLException e){
@@ -186,6 +189,7 @@ public class Evaluate {
     }
 
     public static Object EvaluateSetUserPermissions(Connection con, SetUserPermissionsRequest request) {
+        // SQL query to delete old permissions
         String sql = String.format("DELETE FROM user_permissions WHERE UserName = '%s';", request.getUserName());
 
         try {
@@ -193,6 +197,7 @@ public class Evaluate {
 
             statement.execute(sql);
 
+            // Generate and run SQL for adding new permissions
             if (request.getPermissions().size() > 0) {
                 sql = "INSERT INTO user_permissions (UserName, PermissionName) VALUES";
 
@@ -208,9 +213,51 @@ public class Evaluate {
                 statement.executeQuery(sql);
             }
 
+            // Return true if successful
             return true;
         }
         catch (SQLException e){
+            return new ErrorMessage(e.getMessage());
+        }
+    }
+
+    public static Object EvaluateListUsers(Connection con){
+        // SQL query to get usernames and how many billboards each user has created
+        String sql = "SELECT users.Name, count(billboards.Name) as number_of_billboards from users left join billboards on (billboards.CreatorName = users.Name) group by users.Name";
+
+        try {
+            // Create statement
+            Statement statement = con.createStatement();
+
+            ResultSet userSet = statement.executeQuery(sql);
+
+            LinkedList<User> users = new LinkedList<>();
+
+            // Add all results to a list of users and return
+            while (userSet.next()){
+                users.add(new User(userSet.getString("Name"), userSet.getInt("number_of_billboards")));
+            }
+
+            return users;
+        }
+        catch (SQLException e){
+            return new ErrorMessage(e.getMessage());
+        }
+    }
+
+    public static Object EvaluateSetUserPassword(Connection con, SetUserPasswordRequest request) {
+        try {
+            // SQL query to insert new password
+            String sql = String.format("UPDATE users SET Password = '%s' WHERE Name = '%s';", Password.getSaltedHash(request.getHashedPassword()), request.getUserName());
+
+            Statement statement = con.createStatement();
+
+            statement.execute(sql);
+
+            // Return true if successful
+            return true;
+        }
+        catch (Exception e){
             return new ErrorMessage(e.getMessage());
         }
     }
