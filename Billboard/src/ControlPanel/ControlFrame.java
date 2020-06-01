@@ -94,6 +94,8 @@ public class ControlFrame implements ActionListener {
     private JCheckBox hourCheck;
     private JSpinner repetitionMins;
     private JButton scheduleButton;
+    private JCheckBox enableRep;
+    private JLabel enableLabel;
 
     //Create List Components
     private JLabel firstLabel;
@@ -120,7 +122,7 @@ public class ControlFrame implements ActionListener {
     private int hour;
     private int minute;
     private int durMins = 1;
-    private int repeatMins = 59;
+    private int repeatMins = 30;
     private boolean meridiem = false;
     private boolean repeatDay = false;
     private boolean repeatHour = false;
@@ -188,6 +190,7 @@ public class ControlFrame implements ActionListener {
         SpinListener spinL = new SpinListener();
         amRadio.addItemListener(timeL);
         pmRadio.addItemListener(timeL);
+        enableRep.addItemListener(timeL);
         dayCheck.addItemListener(timeL);
         hourCheck.addItemListener(timeL);
         yearSpinner.addChangeListener(spinL);
@@ -210,36 +213,11 @@ public class ControlFrame implements ActionListener {
         } else {
             date = day + "/" + month + "/" + year;
         }
-        if(hour >= 0 && hour < 10){
-            if (minute >= 0 && minute < 10){
-                if(meridiem == true){
-                    date = date + " 0" + hour + ":0" + minute + " pm";
-                } else if (meridiem == false){
-                    date = date + " 0" + hour + ":0" + minute + " am";
-                }
-            } else if (minute > 10){
-                if(meridiem == true){
-                    date = date + " 0" + hour + ":" + minute + " pm";
-                } else if (meridiem == false){
-                    date = date + " 0" + hour + ":" + minute + " am";
-                }
-            }
-        } else if (hour > 10){
-            if (minute >= 0 && minute < 10){
-                if(meridiem == true){
-                    date = date + " " + hour + ":0" + minute + " pm";
-                } else if (meridiem == false){
-                    date = date + " " + hour + ":0" + minute + " am";
-                }
-            } else if (minute > 10){
-                if(meridiem == true){
-                    date = date + " " + hour + ":" + minute + " pm";
-                } else if (meridiem == false){
-                    date = date + " " + hour + ":" + minute + " am";
-                }
-            }
-        }
         if(validateDate(date)){
+            JOptionPane successBox = new JOptionPane();
+            ImageIcon icon = new ImageIcon(this.getClass().getResource("/images/Checkmark_green.jpg"));
+            successBox.showMessageDialog(frame, "Billboard Successfully Scheduled!", "Billboard Scheduled", JOptionPane.INFORMATION_MESSAGE, icon);
+            frame.validate();
 
         } else if (!validateDate(date)){
             UIManager ui = new UIManager();
@@ -252,12 +230,42 @@ public class ControlFrame implements ActionListener {
     }
 
     private boolean validateDate(String testDate){
+        String testDateTime = "";
         try{
+            if(hour < 10){
+                if(minute < 10){
+                    if(meridiem){
+                        testDateTime = testDate + " 0" + hour + ":0" + minute + " pm";
+                    } else if (!meridiem){
+                        testDateTime = testDate + " 0" + hour + ":0" + minute + " am";
+                    }
+                } else if (minute >= 10){
+                    if(meridiem){
+                        testDateTime = testDate + " 0" + hour + ":" + minute + " pm";
+                    } else if (!meridiem){
+                        testDateTime = testDate + " 0" + hour + ":" + minute + " am";
+                    }
+                }
+            } else if (hour >= 10){
+                if(minute < 10){
+                    if(meridiem){
+                        testDateTime = testDate + " " + hour + ":0" + minute + " pm";
+                    } else if (!meridiem){
+                        testDateTime = testDate + " " + hour + ":0" + minute + " am";
+                    }
+                } else if (minute >= 10){
+                    if(meridiem){
+                        testDateTime = testDate + " " + hour + ":" + minute + " pm";
+                    } else if (!meridiem){
+                        testDateTime = testDate + " " + hour + ":" + minute + " am";
+                    }
+                }
+            }
             LocalDateTime today = LocalDateTime.now();
             DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
             String todayDate = today.format(format);
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
-            Date inputDate = sdf.parse(testDate);
+            Date inputDate = sdf.parse(testDateTime);
             Date checkDate = sdf.parse(todayDate);
             if(inputDate.before(checkDate)){
                 return false;
@@ -273,6 +281,9 @@ public class ControlFrame implements ActionListener {
 
     private void setupEditing() {
         setTextLabel = new JLabel("Set Text");
+        setTextLabel.setForeground(new Color(70, 70 ,150));
+        Font setF = setTextLabel.getFont();
+        setTextLabel.setFont(setF.deriveFont(setF.getStyle() | Font.ITALIC));
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
         grid.gridy = 10;
@@ -303,6 +314,9 @@ public class ControlFrame implements ActionListener {
         panel.add(characterCount, grid);
 
         setPosition = new JLabel("Set Position");
+        setPosition.setForeground(new Color(70, 70 ,150));
+        Font posF = setPosition.getFont();
+        setPosition.setFont(posF.deriveFont(posF.getStyle() | Font.ITALIC));
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
         grid.gridy = 13;
@@ -370,12 +384,14 @@ public class ControlFrame implements ActionListener {
         panel.add(repetitionMinutes, grid);
 
         dayCheck = new JCheckBox();
+        dayCheck.setEnabled(false);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 2;
         grid.gridy = 7;
         panel.add(dayCheck, grid);
 
         hourCheck = new JCheckBox();
+        hourCheck.setEnabled(false);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 3;
         grid.gridy = 7;
@@ -383,10 +399,23 @@ public class ControlFrame implements ActionListener {
 
         repetitionModel = new SpinnerNumberModel(repeatMins, durMins + 1, 59, 1);
         repetitionMins = new JSpinner(repetitionModel);
+        repetitionMins.setEnabled(false);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 4;
         grid.gridy = 7;
         panel.add(repetitionMins, grid);
+
+        enableRep = new JCheckBox();
+        grid.fill = GridBagConstraints.VERTICAL;
+        grid.gridx = 5;
+        grid.gridy = 6;
+        panel.add(enableRep, grid);
+
+        enableLabel = new JLabel("Repetition?");
+        grid.fill = GridBagConstraints.VERTICAL;
+        grid.gridx = 5;
+        grid.gridy = 5;
+        panel.add(enableLabel, grid);
     }
 
     private void setupMeridiem(){
@@ -806,9 +835,9 @@ public class ControlFrame implements ActionListener {
                 minute = (Integer) minuteSpinner.getValue();
             } else if (spin.equals(durationSpin)){
                 durMins = (Integer) durationSpin.getValue();
-                repetitionModel.setMinimum(durMins + 1);
-                repetitionMins.setModel(repetitionModel);
                 if(durMins == 59) {
+                    repetitionModel.setMinimum(durMins + 1);
+                    repetitionMins.setModel(repetitionModel);
                     ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(false);
                     repetitionMins.setToolTipText("You cannot have repetition the same as the duration, try using the Hour Checkbox!");
                 }else if(repeatMins == durMins){
@@ -840,7 +869,12 @@ public class ControlFrame implements ActionListener {
             } else if (mer.equals(pmRadio)){
                 meridiem = true;
             }
-            if (repeats.equals(dayCheck)){
+            if (repeats.equals(enableRep)){
+                hourCheck.setEnabled(true);
+                dayCheck.setEnabled(true);
+                repetitionMins.setEnabled(true);
+                repetitionMins.setValue(repeatMins);
+            } else if (repeats.equals(dayCheck)){
                 repeatDay = true;
                 repeatHour = false;
                 hourCheck.setEnabled(false);
@@ -864,7 +898,12 @@ public class ControlFrame implements ActionListener {
                 dayCheck.setToolTipText("Can only have 1 option selected");
             }
             if(event.getStateChange() == ItemEvent.DESELECTED){
-                if(event.getItemSelectable() == dayCheck){
+                if(event.getItemSelectable() == enableRep){
+                    dayCheck.setEnabled(false);
+                    hourCheck.setEnabled(false);
+                    repetitionMins.setEnabled(false);
+                    repetitionMins.setValue(0);
+                } else if(event.getItemSelectable() == dayCheck){
                     repeatDay = false;
                     hourCheck.setEnabled(true);
                     repetitionMins.setValue(repeatMins);
