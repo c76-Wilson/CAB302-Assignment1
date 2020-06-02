@@ -558,16 +558,24 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
                 if(bill=="")
                 {
                     e = new Billboard_Viewer("Error Screen",true,"");
+                    x.dispose();
+                    x = new Billboard_Viewer("Error Screen",true,"");
+                    e.dispose();
                 }
                 else
                 {
                     e = new Billboard_Viewer("Billboard Viewer",
                             false,
                             bill);
-
+                    x.dispose();
+                    x = new Billboard_Viewer("Billboard Viewer",
+                            false,
+                            bill);
+                    e.dispose();
                 }
-                //delete temp
-                x.dispose();
+
+
+
             }
             else {
                 try{ bill = serverRetreival(); }
