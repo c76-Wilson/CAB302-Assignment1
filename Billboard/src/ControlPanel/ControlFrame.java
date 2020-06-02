@@ -98,10 +98,12 @@ public class ControlFrame implements ActionListener {
     private JButton scheduleButton;
     private JCheckBox enableRep;
     private JLabel enableLabel;
+    private JLabel setName;
     private JTextField setBillboardName;
     private String billboardName = "";
     private int nameChars = 0;
     private JLabel nameCount;
+    private JCheckBox editName;
 
     //Create List Components
     private JLabel firstLabel;
@@ -178,18 +180,22 @@ public class ControlFrame implements ActionListener {
         setupMeridiem();
         setupRepetition();
         setupEditing();
+
         scheduleButton = new JButton("Schedule!");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 2;
-        grid.gridy = 8;
+        grid.gridy = 9;
         panel.add(scheduleButton, grid);
+
         TimeListener timeL = new TimeListener();
         SpinListener spinL = new SpinListener();
+
         amRadio.addItemListener(timeL);
         pmRadio.addItemListener(timeL);
         enableRep.addItemListener(timeL);
         dayCheck.addItemListener(timeL);
         hourCheck.addItemListener(timeL);
+        editName.addItemListener(timeL);
         yearSpinner.addChangeListener(spinL);
         monthSpinner.addChangeListener(spinL);
         daySpinner.addChangeListener(spinL);
@@ -253,8 +259,8 @@ public class ControlFrame implements ActionListener {
             UIManager ui = new UIManager();
             ui.put("OptionPane.messageForeground", Color.RED);
             JOptionPane errorBox = new JOptionPane();
-            errorBox.showMessageDialog(frame, "Make sure the Date and Time of Scheduling " +
-                    "is after today's date and is a VALID date", "Invalid Date", JOptionPane.WARNING_MESSAGE);
+            errorBox.showMessageDialog(frame, "Make sure the Schedule is after Today's Date and Time " +
+                    "is a VALID date and has a Billboard Name", "Invalid Schedule", JOptionPane.WARNING_MESSAGE);
             frame.validate();
         }
     }
@@ -272,9 +278,17 @@ public class ControlFrame implements ActionListener {
         try{
             if(hour < 10){
                 if(minute < 10){
-                    testDateTime = testDate + " 0" + hour + ":0" + minute;
+                    if(meridiem){
+                        testDateTime = testDate + " " + (hour + 12) + ":0" + minute;
+                    } else if (!meridiem){
+                        testDateTime = testDate + " 0" + hour + ":0" + minute;
+                    }
                 } else if (minute >= 10){
-                    testDateTime = testDate + " 0" + hour + ":" + minute;
+                    if(meridiem){
+                        testDateTime = testDate + " " + (hour + 12) + ":" + minute;
+                    } else if (!meridiem){
+                        testDateTime = testDate + " 0" + hour + ":" + minute;
+                    }
                 }
             } else if (hour >= 10 && hour < 12){
                 if(minute < 10){
@@ -305,17 +319,22 @@ public class ControlFrame implements ActionListener {
                     }
                 }
             }
-            LocalDateTime today = LocalDateTime.now();
-            DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            String todayDate = today.format(format);
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            Date inputDate = sdf.parse(testDateTime);
-            Date checkDate = sdf.parse(todayDate);
-            if(inputDate.before(checkDate)){
+            billboardName = setBillboardName.getText();
+            if(billboardName == null || billboardName.length() == 0){
                 return false;
             } else {
-                Matcher matcher = datePattern.matcher(testDate);
-                return matcher.matches();
+                LocalDateTime today = LocalDateTime.now();
+                DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                String todayDate = today.format(format);
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                Date inputDate = sdf.parse(testDateTime);
+                Date checkDate = sdf.parse(todayDate);
+                if(inputDate.before(checkDate)){
+                    return false;
+                } else {
+                    Matcher matcher = datePattern.matcher(testDate);
+                    return matcher.matches();
+                }
             }
         } catch(ParseException e){
             e.printStackTrace();
@@ -324,13 +343,21 @@ public class ControlFrame implements ActionListener {
     }
 
     private void setupEditing() {
+        editName = new JCheckBox("Edit?");
+        editName.setVerticalTextPosition(SwingConstants.TOP);
+        editName.setHorizontalTextPosition(SwingConstants.CENTER);
+        grid.fill = GridBagConstraints.VERTICAL;
+        grid.gridx = 9;
+        grid.gridy = 0;
+        panel.add(editName, grid);
+
         setTextLabel = new JLabel("Set Text");
         setTextLabel.setForeground(new Color(70, 70 ,150));
         Font setF = setTextLabel.getFont();
         setTextLabel.setFont(setF.deriveFont(setF.getStyle() | Font.ITALIC));
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
-        grid.gridy = 10;
+        grid.gridy = 11;
         panel.add(setTextLabel, grid);
 
         setText = new JTextArea(8, 12);
@@ -349,13 +376,13 @@ public class ControlFrame implements ActionListener {
         setText.getDocument().addDocumentListener(new TextListener());
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
-        grid.gridy = 11;
+        grid.gridy = 12;
         panel.add(setText, grid);
 
         characterCount = new JLabel(textLength + " / 120 Characters");
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
-        grid.gridy = 12;
+        grid.gridy = 13;
         panel.add(characterCount, grid);
 
         setPosition = new JLabel("Set Position");
@@ -364,39 +391,39 @@ public class ControlFrame implements ActionListener {
         setPosition.setFont(posF.deriveFont(posF.getStyle() | Font.ITALIC));
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
-        grid.gridy = 13;
+        grid.gridy = 14;
         panel.add(setPosition, grid);
 
         XHeader = new JLabel("X");
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
-        grid.gridy = 14;
+        grid.gridy = 15;
         panel.add(XHeader, grid);
 
         YHeader = new JLabel("Y");
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 10;
-        grid.gridy = 14;
+        grid.gridy = 15;
         panel.add(YHeader, grid);
 
         SpinnerNumberModel xModel = new SpinnerNumberModel(xCoords, 0, 960, 1);
         textX = new JSpinner(xModel);
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
-        grid.gridy = 15;
+        grid.gridy = 16;
         panel.add(textX, grid);
 
         SpinnerNumberModel yModel = new SpinnerNumberModel(yCoords, 0, 240, 1);
         textY = new JSpinner(yModel);
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 10;
-        grid.gridy = 15;
+        grid.gridy = 16;
         panel.add(textY, grid);
 
         addText = new JButton("Add Text!");
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 9;
-        grid.gridy = 16;
+        grid.gridy = 17;
         panel.add(addText, grid);
     }
 
@@ -407,39 +434,39 @@ public class ControlFrame implements ActionListener {
         repetitionLabel.setFont(repF.deriveFont(repF.getStyle() | Font.ITALIC));
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 3;
-        grid.gridy = 5;
+        grid.gridy = 6;
         panel.add(repetitionLabel, grid);
 
         repetitionDay = new JLabel("Day");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 2;
-        grid.gridy = 6;
+        grid.gridy = 7;
         panel.add(repetitionDay, grid);
 
         repetitionHour = new JLabel("Hour");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 3;
-        grid.gridy = 6;
+        grid.gridy = 7;
         panel.add(repetitionHour, grid);
 
         repetitionMinutes = new JLabel("Minutes");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 4;
-        grid.gridy = 6;
+        grid.gridy = 7;
         panel.add(repetitionMinutes, grid);
 
         dayCheck = new JCheckBox();
         dayCheck.setEnabled(false);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 2;
-        grid.gridy = 7;
+        grid.gridy = 8;
         panel.add(dayCheck, grid);
 
         hourCheck = new JCheckBox();
         hourCheck.setEnabled(false);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 3;
-        grid.gridy = 7;
+        grid.gridy = 8;
         panel.add(hourCheck, grid);
 
         repetitionModel = new SpinnerNumberModel(repeatMins, durMins + 1, 59, 1);
@@ -448,19 +475,19 @@ public class ControlFrame implements ActionListener {
         repetitionMins.setValue(0);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 4;
-        grid.gridy = 7;
+        grid.gridy = 8;
         panel.add(repetitionMins, grid);
 
         enableRep = new JCheckBox();
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 5;
-        grid.gridy = 6;
+        grid.gridy = 7;
         panel.add(enableRep, grid);
 
         enableLabel = new JLabel("Repetition?");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 5;
-        grid.gridy = 5;
+        grid.gridy = 6;
         panel.add(enableLabel, grid);
     }
 
@@ -470,7 +497,7 @@ public class ControlFrame implements ActionListener {
         amRadio.setHorizontalTextPosition(SwingConstants.CENTER);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 5;
-        grid.gridy = 3;
+        grid.gridy = 4;
         panel.add(amRadio, grid);
         amRadio.setVisible(true);
 
@@ -479,7 +506,7 @@ public class ControlFrame implements ActionListener {
         pmRadio.setHorizontalTextPosition(SwingConstants.CENTER);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 7;
-        grid.gridy = 3;
+        grid.gridy = 4;
         panel.add(pmRadio, grid);
         pmRadio.setVisible(true);
 
@@ -500,27 +527,27 @@ public class ControlFrame implements ActionListener {
         durationLabel.setFont(durF.deriveFont(durF.getStyle() | Font.ITALIC));
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 0;
-        grid.gridy = 5;
+        grid.gridy = 6;
         panel.add(durationLabel, grid);
 
         durationMins = new JLabel("Minutes");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 0;
-        grid.gridy = 6;
+        grid.gridy = 7;
         panel.add(durationMins, grid);
 
         SpinnerNumberModel durationModel = new SpinnerNumberModel(durMins, 1, 59, 1);
         durationSpin = new JSpinner(durationModel);
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 0;
-        grid.gridy = 7;
+        grid.gridy = 8;
         panel.add(durationSpin, grid);
 
         filler = new JLabel("I");
         filler.setForeground(panel.getBackground());
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 2;
-        grid.gridy = 4;
+        grid.gridy = 5;
         panel.add(filler, grid);
     }
 
@@ -531,49 +558,49 @@ public class ControlFrame implements ActionListener {
         timeLabel.setFont(timeF.deriveFont(timeF.getStyle() | Font.ITALIC));
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 2;
-        grid.gridy = 0;
+        grid.gridy = 1;
         panel.add(timeLabel, grid);
         timeLabel.setVisible(true);
 
         timeYear = new JLabel("Year");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 0;
-        grid.gridy = 2;
+        grid.gridy = 3;
         panel.add(timeYear, grid);
         timeYear.setVisible(true);
 
         timeMonth = new JLabel("Month");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 1;
-        grid.gridy = 2;
+        grid.gridy = 3;
         panel.add(timeMonth, grid);
         timeMonth.setVisible(true);
 
         timeDay = new JLabel("Day");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 2;
-        grid.gridy = 2;
+        grid.gridy = 3;
         panel.add(timeDay, grid);
         timeDay.setVisible(true);
 
         timeHour = new JLabel("Hour");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 3;
-        grid.gridy = 2;
+        grid.gridy = 3;
         panel.add(timeHour, grid);
         timeHour.setVisible(true);
 
         timeMinute = new JLabel("Minutes");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 4;
-        grid.gridy = 2;
+        grid.gridy = 3;
         panel.add(timeMinute, grid);
         timeMinute.setVisible(true);
 
         timeA = new JLabel("Meridiem?");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 6;
-        grid.gridy = 2;
+        grid.gridy = 3;
         panel.add(timeA, grid);
         timeA.setVisible(true);
     }
@@ -598,31 +625,31 @@ public class ControlFrame implements ActionListener {
 
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 0;
-        grid.gridy = 3;
+        grid.gridy = 4;
         panel.add(yearSpinner, grid);
         yearSpinner.setVisible(true);
 
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 1;
-        grid.gridy = 3;
+        grid.gridy = 4;
         panel.add(monthSpinner, grid);
         monthSpinner.setVisible(true);
 
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 2;
-        grid.gridy = 3;
+        grid.gridy = 4;
         panel.add(daySpinner, grid);
         daySpinner.setVisible(true);
 
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 3;
-        grid.gridy = 3;
+        grid.gridy = 4;
         panel.add(hourSpinner, grid);
         hourSpinner.setVisible(true);
 
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 4;
-        grid.gridy = 3;
+        grid.gridy = 4;
         panel.add(minuteSpinner, grid);
         minuteSpinner.setVisible(true);
     }
@@ -653,7 +680,14 @@ public class ControlFrame implements ActionListener {
     }
 
     private void setupCanvas() {
+        setName = new JLabel("Set Billboard Name");
+        grid.fill = GridBagConstraints.VERTICAL;
+        grid.gridx = 8;
+        grid.gridy = 0;
+        panel.add(setName, grid);
+
         setBillboardName = new JTextField(50);
+        setBillboardName.setEnabled(false);
         setBillboardName.setDocument(new PlainDocument() {
             @Override
             public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
@@ -668,13 +702,13 @@ public class ControlFrame implements ActionListener {
         setBillboardName.getDocument().addDocumentListener(new TextListener());
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 8;
-        grid.gridy = 0;
+        grid.gridy = 1;
         panel.add(setBillboardName, grid);
 
         nameCount = new JLabel(nameChars + " / 50 Characters");
         grid.fill = GridBagConstraints.VERTICAL;
         grid.gridx = 9;
-        grid.gridy = 0;
+        grid.gridy = 1;
         panel.add(nameCount, grid);
 
         mainCanvas = new JLabel("Test");
@@ -682,7 +716,7 @@ public class ControlFrame implements ActionListener {
         mainCanvas.setMaximumSize(new Dimension(960, 240));
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridx = 8;
-        grid.gridy = 1;
+        grid.gridy = 2;
         panel.add(mainCanvas, grid);
         mainCanvas.setVisible(true);
     }
@@ -697,7 +731,7 @@ public class ControlFrame implements ActionListener {
         grid.fill = GridBagConstraints.HORIZONTAL;
         grid.gridheight = 7;
         grid.gridx = 8;
-        grid.gridy = 10;
+        grid.gridy = 11;
         panel.add(palette, grid);
         palette.setVisible(true);
     }
@@ -984,6 +1018,8 @@ public class ControlFrame implements ActionListener {
                 ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(false);
                 repetitionMins.setToolTipText("Can only have 1 option selected");
                 dayCheck.setToolTipText("Can only have 1 option selected");
+            } else if (repeats.equals(editName)){
+                setBillboardName.setEnabled(true);
             }
             if(event.getStateChange() == ItemEvent.DESELECTED){
                 if(event.getItemSelectable() == enableRep){
@@ -1011,6 +1047,8 @@ public class ControlFrame implements ActionListener {
                     dayCheck.setBackground(panel.getBackground());
                     dayCheck.setToolTipText(null);
                     hourCheck.setBackground(panel.getBackground());
+                } else if (repeats.equals(editName)){
+                    setBillboardName.setEnabled(false);
                 }
             }
         }
@@ -1020,7 +1058,17 @@ public class ControlFrame implements ActionListener {
     class MenuItemListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if(e.getActionCommand() == "New"){
-
+                billboardName = JOptionPane.showInputDialog(frame, "What would you like the Billboard Name to be?",
+                        "Create Billboard", JOptionPane.INFORMATION_MESSAGE);
+                if(billboardName.length() > 50){
+                    JOptionPane.showMessageDialog(frame, "You may have only upto 50 characters in a Billboard Name",
+                            "Maximum Characters", JOptionPane.ERROR_MESSAGE);
+                    billboardName = JOptionPane.showInputDialog(frame, "What would you like the Billboard Name to be?",
+                            "Create Billboard [LAST ATTEMPT]", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    setBillboardName.setText(billboardName);
+                    //CreateEditBillboardRequest billboard = new CreateEditBillboardRequest();
+                }
             } else if (e.getActionCommand() == "Import"){
 
             } else if (e.getActionCommand() == "Export"){
@@ -1089,7 +1137,7 @@ public class ControlFrame implements ActionListener {
             grid.fill = GridBagConstraints.VERTICAL;
             failedLogin.setForeground(Color.RED);
             grid.gridx = 1;
-            grid.gridy = 5;
+            grid.gridy = 3;
             failedLogin.setVisible(true);
             panel.add(failedLogin);
             frame.revalidate();
