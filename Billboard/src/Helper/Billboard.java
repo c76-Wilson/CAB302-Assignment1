@@ -33,26 +33,14 @@ public class Billboard implements Serializable {
     public void setCreatorName(String creatorName) { this.creatorName = creatorName; }
     //endregion
 
-    //region ScheduleID
-    private Integer scheduleID;
-
-    public Integer getScheduleID() {
-        return scheduleID;
+    public Billboard(String name, String creatorName){
+        setName(name);
+        setCreatorName(creatorName);
     }
-
-    public void setScheduleID(Integer scheduleID) { this.scheduleID = scheduleID; }
-    //endregion
 
     public Billboard(String name, String xml, String creatorName){
         setName(name);
         setXml(xml);
         setCreatorName(creatorName);
-    }
-
-    public Billboard(String name, String xml, String creatorName, Integer scheduleID){
-        setName(name);
-        setXml(xml);
-        setCreatorName(creatorName);
-        setScheduleID(scheduleID);
     }
 }
