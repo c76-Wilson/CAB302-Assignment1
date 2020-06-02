@@ -78,17 +78,21 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         //code to create panel for required components
         mainPanel = createPanel();
         mainPanel.setFocusable(true);
-        mainPanel.addKeyListener(this);
-        mainPanel.addMouseListener(this);
+
 
         msg_panel = createPanel();
         msg_panel.setFocusable(true);
+        msg_panel.addKeyListener(this);
+        msg_panel.addMouseListener(this);
 
         img_panel = createPanel();
-        img_panel.setFocusable(true);
+        img_panel.addKeyListener(this);
+        img_panel.addMouseListener(this);
 
         info_panel = createPanel();
         info_panel.setFocusable(true);
+
+
 
         //code for testing purposes
         getContentPane().add(mainPanel);
@@ -205,6 +209,8 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         informationLocked.setEditable(false);
         informationLocked.setForeground(text_color);
         informationLocked.setBackground(panelColor);
+        informationLocked.addKeyListener(this);
+        informationLocked.addMouseListener(this);
 
 
     }
@@ -378,15 +384,14 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
-
-
-
-
-
-
-    //pull image from local project and instantiate onto a JLabel
+    /**
+     *
+     * @param base_image
+     * @throws IOException
+     */
     private void createImageLocal(String base_image) throws IOException
     {
+        //pull image from local project and instantiate onto a JLabel
         Dimension bounds = new Dimension(WIDTH,HEIGHT/num_panels);
         imagePanel = new JLabel();
         imagePanel.setPreferredSize(bounds);
@@ -406,7 +411,11 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
     }
 
-
+    /**
+     *
+     * @param url
+     * @throws IOException
+     */
     private void createImageFromURL(String url) throws IOException {
         Dimension bounds = new Dimension(WIDTH,HEIGHT/num_panels);
         imagePanel = new JLabel();
@@ -427,9 +436,6 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
 
 
-    //layout all the JComponents on the panel
-    //stage 1: layout pic/msg/info
-    //stage 2: make component selection dynamic with params
     private void layoutPanels()
     {
         //init dimension vars
@@ -508,6 +514,16 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
+    /**
+     *
+     * @param component
+     * @param layout
+     * @param layoutConstraints
+     * @param row
+     * @param column
+     * @param width
+     * @param height
+     */
 
     private void addComponent(Component component,GridBagLayout layout,GridBagConstraints layoutConstraints, int row,
                               int column, int width, int height) {
@@ -521,10 +537,9 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
 
 
-
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
         //init bool and jFrame
-        String bill = null;
+        String bill = "";
         JFrame x = null;
         //test server connection
         try{ bill = serverRetreival(); }
@@ -532,30 +547,32 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
         while(true)
         {
-
-            try{ bill = serverRetreival(); }
-            catch(Exception e) { e.printStackTrace();}
+            bill = "";
             //if instance already active
             if(x!=null)
             {
+                try{ bill = serverRetreival(); }
+                catch(Exception e) { e.printStackTrace();}
                 //temp instance
                 JFrame e = null;
-                if(bill==null)
+                if(bill=="")
                 {
                     e = new Billboard_Viewer("Error Screen",true,"");
                 }
                 else
                 {
-                    e = new Billboard_Viewer("Billboard Viewer",false,bill );
+                    e = new Billboard_Viewer("Billboard Viewer",
+                            false,
+                            bill);
 
                 }
-                //copy new billboard
-                x = e;
                 //delete temp
-                e.dispose();
+                x.dispose();
             }
             else {
-                if (bill == null) {
+                try{ bill = serverRetreival(); }
+                catch(Exception e) { e.printStackTrace();}
+                if (bill == "") {
                     x = new Billboard_Viewer("Error Screen", true, "");
                 } else {
                     x = new Billboard_Viewer("Billboard Viewer", false, bill);
