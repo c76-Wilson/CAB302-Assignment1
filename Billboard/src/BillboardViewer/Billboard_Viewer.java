@@ -61,6 +61,20 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
     }
 
+    public Billboard_Viewer(String name,boolean server_error,String xml,Dimension dimension) throws IOException {
+        //set title
+        super(name);
+        if(!server_error){server_xml=xml; run();}
+        else
+        {
+            server_error_g = true;
+            window = dimension;
+            run();
+        }
+
+
+    }
+
 
 
     //method to create the GUI window and add the elements to it
@@ -551,6 +565,7 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
             //if instance already active
             if(x!=null)
             {
+
                 try{ bill = serverRetreival(); }
                 catch(Exception e) { e.printStackTrace();}
                 //temp instance
