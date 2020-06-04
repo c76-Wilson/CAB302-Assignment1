@@ -4,6 +4,8 @@ import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,27 +49,6 @@ public class ControlFrame implements ActionListener {
     private JLabel headerLabel;
     private JLabel statusLabel;
     private JPanel controlPanel;
-
-    //Create Canvas Components
-    private JLabel mainCanvas;
-    private JColorChooser palette;
-    private JLabel setTextLabel;
-    private JTextArea setText;
-    private JLabel setPosition;
-    private JSpinner textX;
-    private JSpinner textY;
-    private JLabel XHeader;
-    private JLabel YHeader;
-    private JButton addText;
-    private JButton saveBillboard;
-    private JLabel characterCount;
-
-    //Create Canvas Variables
-    private int xCoords = 480;
-    private int yCoords = 120;
-    private String textAdd;
-    private int textLength;
-    private DefaultStyledDocument textDocument;
 
     //Create Time Components
     private JLabel timeLabel;
@@ -97,31 +79,31 @@ public class ControlFrame implements ActionListener {
     private JSpinner repetitionMins;
     private JButton scheduleButton;
     private JCheckBox enableRep;
+
+    //Create User Components
+    private JFrame userFrame;
+    private JPanel userPanel;
+    private GridBagConstraints userGrid;
+    private JLabel labelUser;
+    private JLabel labelPass;
+    private JPasswordField setPassword;
     private JLabel enableLabel;
-    private JLabel setName;
-    private JTextField setBillboardName;
-    private String billboardName = "";
+    private JTextField setUsername;
+    private JCheckBox editName;
+    private JButton userMake;
+    private JCheckBox enableCreate;
+    private JCheckBox enableEdit;
+    private JCheckBox enableSchedule;
+    private JCheckBox enableUser;
+
+    //Create User Variables
+    private String nameUser = "";
     private int nameChars = 0;
     private JLabel nameCount;
-    private JCheckBox editName;
-
-    //Create List Components
-    private JLabel firstLabel;
-    private JLabel firstCanvas;
-    private JLabel secondLabel;
-    private JLabel secondCanvas;
-    private JLabel thirdLabel;
-    private JLabel thirdCanvas;
-    private JLabel fourthLabel;
-    private JLabel fourthCanvas;
-    private JLabel fifthLabel;
-    private JLabel fifthCanvas;
-    private JLabel sixthLabel;
-    private JLabel sixthCanvas;
-    private JLabel seventhLabel;
-    private JLabel seventhCanvas;
-    private JLabel eighthLabel;
-    private JLabel eighthCanvas;
+    private boolean boolCreate;
+    private boolean boolEdit;
+    private boolean boolUser;
+    private boolean boolSchedule;
 
     //Create time variables
     private int year = 2020;
@@ -167,8 +149,6 @@ public class ControlFrame implements ActionListener {
         grid = new GridBagConstraints();
         setupMenu();
         setupScheduling();
-        setupCanvas();
-        setupColourPalette();
         frame.add(panel);
     }
 
@@ -179,7 +159,6 @@ public class ControlFrame implements ActionListener {
         setupDurationLabels();
         setupMeridiem();
         setupRepetition();
-        setupEditing();
 
         scheduleButton = new JButton("Schedule!");
         grid.fill = GridBagConstraints.VERTICAL;
@@ -195,7 +174,6 @@ public class ControlFrame implements ActionListener {
         enableRep.addItemListener(timeL);
         dayCheck.addItemListener(timeL);
         hourCheck.addItemListener(timeL);
-        editName.addItemListener(timeL);
         yearSpinner.addChangeListener(spinL);
         monthSpinner.addChangeListener(spinL);
         daySpinner.addChangeListener(spinL);
@@ -230,9 +208,9 @@ public class ControlFrame implements ActionListener {
             Duration rep = Duration.ofMinutes(repeatMins);
             ScheduleBillboardRequest billboard;
             if(repeatMins > 0){
-                billboard = new ScheduleBillboardRequest(billboardName, scheduleTime, dur, sessionToken, rep);
+                billboard = new ScheduleBillboardRequest(nameUser, scheduleTime, dur, sessionToken, rep);
             } else {
-                billboard = new ScheduleBillboardRequest(billboardName, scheduleTime, dur, sessionToken);
+                billboard = new ScheduleBillboardRequest(nameUser, scheduleTime, dur, sessionToken);
             }
             Object obj = null;
             try {
@@ -319,8 +297,8 @@ public class ControlFrame implements ActionListener {
                     }
                 }
             }
-            billboardName = setBillboardName.getText();
-            if(billboardName == null || billboardName.length() == 0){
+            nameUser = setUsername.getText();
+            if(nameUser == null || nameUser.length() == 0){
                 return false;
             } else {
                 LocalDateTime today = LocalDateTime.now();
@@ -340,91 +318,6 @@ public class ControlFrame implements ActionListener {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private void setupEditing() {
-        editName = new JCheckBox("Edit?");
-        editName.setVerticalTextPosition(SwingConstants.TOP);
-        editName.setHorizontalTextPosition(SwingConstants.CENTER);
-        grid.fill = GridBagConstraints.VERTICAL;
-        grid.gridx = 9;
-        grid.gridy = 0;
-        panel.add(editName, grid);
-
-        setTextLabel = new JLabel("Set Text");
-        setTextLabel.setForeground(new Color(70, 70 ,150));
-        Font setF = setTextLabel.getFont();
-        setTextLabel.setFont(setF.deriveFont(setF.getStyle() | Font.ITALIC));
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 9;
-        grid.gridy = 11;
-        panel.add(setTextLabel, grid);
-
-        setText = new JTextArea(8, 12);
-        setText.setLineWrap(true);
-        setText.setDocument(new PlainDocument() {
-            @Override
-            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-                if (str == null || setText.getText().length() >= 120) {
-                    return;
-                }
-
-                super.insertString(offs, str, a);
-            }
-        });
-        setText.getDocument().putProperty("Area", setText);
-        setText.getDocument().addDocumentListener(new TextListener());
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 9;
-        grid.gridy = 12;
-        panel.add(setText, grid);
-
-        characterCount = new JLabel(textLength + " / 120 Characters");
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 9;
-        grid.gridy = 13;
-        panel.add(characterCount, grid);
-
-        setPosition = new JLabel("Set Position");
-        setPosition.setForeground(new Color(70, 70 ,150));
-        Font posF = setPosition.getFont();
-        setPosition.setFont(posF.deriveFont(posF.getStyle() | Font.ITALIC));
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 9;
-        grid.gridy = 14;
-        panel.add(setPosition, grid);
-
-        XHeader = new JLabel("X");
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 9;
-        grid.gridy = 15;
-        panel.add(XHeader, grid);
-
-        YHeader = new JLabel("Y");
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 10;
-        grid.gridy = 15;
-        panel.add(YHeader, grid);
-
-        SpinnerNumberModel xModel = new SpinnerNumberModel(xCoords, 0, 960, 1);
-        textX = new JSpinner(xModel);
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 9;
-        grid.gridy = 16;
-        panel.add(textX, grid);
-
-        SpinnerNumberModel yModel = new SpinnerNumberModel(yCoords, 0, 240, 1);
-        textY = new JSpinner(yModel);
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 10;
-        grid.gridy = 16;
-        panel.add(textY, grid);
-
-        addText = new JButton("Add Text!");
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 9;
-        grid.gridy = 17;
-        panel.add(addText, grid);
     }
 
     private void setupRepetition() {
@@ -679,63 +572,6 @@ public class ControlFrame implements ActionListener {
         }
     }
 
-    private void setupCanvas() {
-        setName = new JLabel("Set Billboard Name");
-        grid.fill = GridBagConstraints.VERTICAL;
-        grid.gridx = 8;
-        grid.gridy = 0;
-        panel.add(setName, grid);
-
-        setBillboardName = new JTextField(50);
-        setBillboardName.setEnabled(false);
-        setBillboardName.setDocument(new PlainDocument() {
-            @Override
-            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-                if (str == null || setBillboardName.getText().length() >= 50) {
-                    return;
-                }
-
-                super.insertString(offs, str, a);
-            }
-        });
-        setBillboardName.getDocument().putProperty("Area", setBillboardName);
-        setBillboardName.getDocument().addDocumentListener(new TextListener());
-        grid.fill = GridBagConstraints.VERTICAL;
-        grid.gridx = 8;
-        grid.gridy = 1;
-        panel.add(setBillboardName, grid);
-
-        nameCount = new JLabel(nameChars + " / 50 Characters");
-        grid.fill = GridBagConstraints.VERTICAL;
-        grid.gridx = 9;
-        grid.gridy = 1;
-        panel.add(nameCount, grid);
-
-        mainCanvas = new JLabel("Test");
-        mainCanvas.setForeground(new Color(50, 50, 50));
-        mainCanvas.setMaximumSize(new Dimension(960, 240));
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridx = 8;
-        grid.gridy = 2;
-        panel.add(mainCanvas, grid);
-        mainCanvas.setVisible(true);
-    }
-
-    private void setupColourPalette() {
-        palette = new JColorChooser();
-        palette.getSelectionModel().addChangeListener(e -> {
-            Color colour = palette.getColor();
-            mainCanvas.setForeground(colour);
-        });
-
-        grid.fill = GridBagConstraints.HORIZONTAL;
-        grid.gridheight = 7;
-        grid.gridx = 8;
-        grid.gridy = 11;
-        panel.add(palette, grid);
-        palette.setVisible(true);
-    }
-
     private void setupMenu() {
         prepareMenu();
         createMenu();
@@ -903,40 +739,154 @@ public class ControlFrame implements ActionListener {
         frame.setVisible(true);
     }
 
+    private void createUser() {
+        userFrame = new JFrame("Create User");
+        userFrame.setSize(700, 500);
+        userFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        userPanel = new JPanel(new GridBagLayout());
+        userFrame.add(userPanel);
+        userPanel.setVisible(true);
+
+        userGrid = new GridBagConstraints();
+
+        labelUser = new JLabel("Username: ");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 1;
+        userGrid.gridy = 0;
+        userPanel.add(labelUser, userGrid);
+
+        setUsername = new JTextField(20);
+        setUsername.setDocument(new PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if (str == null || setUsername.getText().length() >= 50) {
+                    return;
+                }
+
+                super.insertString(offs, str, a);
+            }
+        });
+        setUsername.getDocument().putProperty("Area", setUsername);
+        setUsername.getDocument().addDocumentListener(new TextListener());
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 2;
+        userGrid.gridy = 0;
+        userPanel.add(setUsername, userGrid);
+
+        nameCount = new JLabel(nameChars + " / 50 Characters");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 3;
+        userGrid.gridy = 0;
+        userPanel.add(nameCount, userGrid);
+
+        labelPass = new JLabel("Password: ");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 1;
+        userGrid.gridy = 1;
+        userPanel.add(labelPass, userGrid);
+
+        setPassword = new JPasswordField(20);
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 2;
+        userGrid.gridy = 1;
+        userPanel.add(setPassword, userGrid);
+
+        enableCreate = new JCheckBox("Create Billboards");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 0;
+        userGrid.gridy = 2;
+        userPanel.add(enableCreate, userGrid);
+
+        enableEdit = new JCheckBox("Edit All Billboards");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 1;
+        userGrid.gridy = 2;
+        userPanel.add(enableEdit, userGrid);
+
+        enableSchedule = new JCheckBox("Schedule Billboards");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 3;
+        userGrid.gridy = 2;
+        userPanel.add(enableSchedule, userGrid);
+
+        enableUser = new JCheckBox("Edit Users");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 4;
+        userGrid.gridy = 2;
+        userPanel.add(enableUser, userGrid);
+
+        userMake = new JButton("Create User");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 2;
+        userGrid.gridy = 3;
+        userPanel.add(userMake, userGrid);
+
+        TimeListener timeL = new TimeListener();
+        enableCreate.addItemListener(timeL);
+        enableEdit.addItemListener(timeL);
+        enableUser.addItemListener(timeL);
+        enableSchedule.addItemListener(timeL);
+
+        userMake.addActionListener(e -> {
+            try {
+                makeUser();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        userFrame.setVisible(true);
+    }
+
+    private void makeUser() throws Exception {
+        LinkedList<String> perms = new LinkedList<>();
+        if(boolCreate == true){
+            perms.add("Create Billboard");
+        }
+        if (boolEdit == true){
+            perms.add("Edit Billboard");
+        }
+        if (boolSchedule == true){
+            perms.add("Schedule Billboard");
+        }
+        if (boolUser == true){
+            perms.add("Edit Users");
+        }
+        nameUser = setUsername.getText();
+        String dummy = String.valueOf(setPassword.getPassword());
+        String hashed = Password.hash(dummy);
+        CreateUserRequest userRequest = new CreateUserRequest(nameUser, perms, hashed, sessionToken);
+        System.out.println(userRequest.toString());
+
+
+    }
+
     class TextListener implements DocumentListener {
         public void insertUpdate(DocumentEvent e) {
             Document doc = e.getDocument();
             Object area = doc.getProperty("Area");
-            if(area.equals(setBillboardName)){
+            if(area.equals(setUsername)){
                 nameChars = doc.getLength();
                 nameCount.setText(nameChars + " / 50 Characters");
-            } else if (area.equals(setText)){
-                textLength = doc.getLength();
-                characterCount.setText(textLength + " / 120 Characters");
             }
         }
 
         public void removeUpdate(DocumentEvent e) {
             Document doc = e.getDocument();
             Object area = doc.getProperty("Area");
-            if(area.equals(setBillboardName)){
+            if(area.equals(setUsername)){
                 nameChars = doc.getLength();
                 nameCount.setText(nameChars + " / 50 Characters");
-            } else if (area.equals(setText)){
-                textLength = doc.getLength();
-                characterCount.setText(textLength + " / 120 Characters");
             }
         }
 
         public void changedUpdate(DocumentEvent e) {
             Document doc = e.getDocument();
             Object area = doc.getProperty("Area");
-            if(area.equals(setBillboardName)){
+            if(area.equals(setUsername)){
                 nameChars = doc.getLength();
                 nameCount.setText(nameChars + " / 50 Characters");
-            } else if (area.equals(setText)){
-                textLength = doc.getLength();
-                characterCount.setText(textLength + " / 120 Characters");
             }
         }
     }
@@ -1018,8 +968,14 @@ public class ControlFrame implements ActionListener {
                 ((JSpinner.DefaultEditor) repetitionMins.getEditor()).getTextField().setEditable(false);
                 repetitionMins.setToolTipText("Can only have 1 option selected");
                 dayCheck.setToolTipText("Can only have 1 option selected");
-            } else if (repeats.equals(editName)){
-                setBillboardName.setEnabled(true);
+            } else if (repeats.equals(enableCreate)){
+                boolCreate = true;
+            } else if (repeats.equals(enableEdit)){
+                boolEdit = true;
+            } else if (repeats.equals(enableUser)){
+                boolUser = true;
+            } else if (repeats.equals(enableSchedule)){
+                boolSchedule = true;
             }
             if(event.getStateChange() == ItemEvent.DESELECTED){
                 if(event.getItemSelectable() == enableRep){
@@ -1047,8 +1003,14 @@ public class ControlFrame implements ActionListener {
                     dayCheck.setBackground(panel.getBackground());
                     dayCheck.setToolTipText(null);
                     hourCheck.setBackground(panel.getBackground());
-                } else if (repeats.equals(editName)){
-                    setBillboardName.setEnabled(false);
+                } else if (event.getItemSelectable() == enableCreate){
+                    boolCreate = false;
+                } else if (event.getItemSelectable() == enableEdit){
+                    boolEdit = false;
+                } else if (event.getItemSelectable() == enableUser){
+                    boolUser = false;
+                } else if (event.getItemSelectable() == enableSchedule){
+                    boolSchedule = false;
                 }
             }
         }
@@ -1058,23 +1020,13 @@ public class ControlFrame implements ActionListener {
     class MenuItemListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if(e.getActionCommand() == "New"){
-                billboardName = JOptionPane.showInputDialog(frame, "What would you like the Billboard Name to be?",
-                        "Create Billboard", JOptionPane.INFORMATION_MESSAGE);
-                if(billboardName.length() > 50){
-                    JOptionPane.showMessageDialog(frame, "You may have only upto 50 characters in a Billboard Name",
-                            "Maximum Characters", JOptionPane.ERROR_MESSAGE);
-                    billboardName = JOptionPane.showInputDialog(frame, "What would you like the Billboard Name to be?",
-                            "Create Billboard [LAST ATTEMPT]", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    setBillboardName.setText(billboardName);
-                    //CreateEditBillboardRequest billboard = new CreateEditBillboardRequest();
-                }
+                //Connor's Billboard Constructor
             } else if (e.getActionCommand() == "Import"){
 
             } else if (e.getActionCommand() == "Export"){
 
             } else if (e.getActionCommand() == "Create"){
-
+                createUser();
             } else if (e.getActionCommand() == "Edit"){
 
             } else if (e.getActionCommand() == "View Billboard"){
