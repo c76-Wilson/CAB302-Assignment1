@@ -508,20 +508,38 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         //init dimension vars
         Dimension pic_size,msg_size,info_size;
         pic_size = msg_size = info_size = null;
-
+        //if all three
         if(pic_created&&msg_created&&info_created) {
             Dimension x = new Dimension(WIDTH,(int)window.getHeight()/num_panels);
             pic_size=msg_size=info_size = x;
         }
+        //if pic and info and not msg
         else if((pic_created&&info_created)&!msg_created){
-            pic_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/3)*2);
-            info_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/3));
+            pic_size = new Dimension((int)screenSize.getWidth()/2,(int)screenSize.getHeight()/2);
+            info_size = new Dimension((int)(screenSize.getWidth()*.75),(int)(screenSize.getHeight()/3));
         }
+        //if message and info and not pic
         else if((msg_created&&info_created)&!pic_created){
-            pic_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/3)*2);
-            info_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/3));
+            msg_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/2));
+            info_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()/2));
         }
-
+        //if pic and msg and not info
+        else if((pic_created&&msg_created)&!info_created){
+            msg_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()*.5));
+            pic_size = new Dimension((int)screenSize.getWidth()/2,(int)screenSize.getHeight()/2);
+        }
+        //if info
+        else if(info_created&!msg_created&!pic_created){
+            info_size = new Dimension((int)(screenSize.getWidth()*.75),(int)(screenSize.getHeight()*.5));
+        }
+        //if msg
+        else if(msg_created&!info_created&!pic_created){
+            msg_size = new Dimension((int)screenSize.getWidth(),(int)(screenSize.getHeight()));
+        }
+        //if pic
+        else if(pic_created&!info_created&!msg_created){
+            pic_size = new Dimension((int)screenSize.getWidth()/2,(int)screenSize.getHeight()/2);
+        }
 
 
 
