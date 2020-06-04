@@ -20,7 +20,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.net.URL;
-
+import java.util.Properties;
 
 
 public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, MouseListener {
@@ -35,7 +35,7 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     private JTextArea informationLocked;
     private JLabel imagePanel;
 
-    //testing vars
+    //defaults
     Color panelColor = Color.BLACK;
     int num_panels = 0;
     boolean pic_created,msg_created,info_created;
@@ -61,6 +61,7 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
     }
 
+
     public Billboard_Viewer(String name,boolean server_error,String xml,Dimension dimension) throws IOException {
         //set title
         super(name);
@@ -76,7 +77,13 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
-
+    /**
+     * Set the parameters of the jFrame and add the event listener's to the panels of the frame
+     * @author Daniel Lawless
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
     //method to create the GUI window and add the elements to it
     private void createGUI() throws IOException, ParserConfigurationException, SAXException {
         //uncomment to make GUI borderless
@@ -131,7 +138,11 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
-    //method to instantiate a JPanel object
+    /**
+     * method to instantiate panel object
+     * @author Daniel Lawless
+     * @return
+     */
     private JPanel createPanel()
     {
         //create JPanel to be returned
@@ -144,6 +155,12 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
+    /**
+     * Instantiate the contents of the MSG panel
+     * @author Daniel Lawless
+     * @param msg
+     * @param text_color
+     */
     //method to create msg object atop JLabel
     private void createMsgLabel(String msg,Color text_color)
     {
@@ -184,6 +201,12 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
     }
 
+    /**
+     * Instantiate the contents of the Information Panel
+     * @author Daniel Lawless
+     * @param info
+     * @param text_color
+     */
     //method to create info object atop JLabel
     private void createInfoLabel(String info,Color text_color)
     {
@@ -229,6 +252,13 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
     }
 
+    /**
+     * Helper method to parse server XML into a file for the documentBuilder
+     * @author Daniel Lawless
+     * @param xml
+     * @return
+     * @throws IOException
+     */
     private File stringXMLtofileXML(String xml) throws IOException {
         File newFile = new File("serverXML.txt");
         newFile.createNewFile();
@@ -239,7 +269,17 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
-
+    /**
+     * This method takes the XML file location, be it local or server derived and parses it into a indexed document
+     * to then access the attributes of a correctly formatted XML document. The attributes are passed of to the relevant helper
+     * methods for each panel.
+     * @author Daniel Lawless
+     * @param file_path
+     * @param local
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
     //method to parse an xml file ton determine the properties of the billboard
     public void parseControlFile(String file_path,boolean local) throws IOException, ParserConfigurationException, SAXException {
         //initialize file and initialize documentBuilder to parse the xml file into an accessible format
@@ -356,6 +396,13 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
+    /**
+     * This method takes a image, rescales it while maintaining a aspect ratio to fit the dimensions of the panel
+     *
+     * @param img
+     * @param bounds
+     * @return
+     */
     private Dimension getScaledImage(BufferedImage img,Dimension bounds)
     {
 
@@ -399,7 +446,8 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
 
     /**
-     *
+     * Take a b64 string and instantiate it onto a jLabel
+     * @author Daniel Lawless
      * @param base_image
      * @throws IOException
      */
@@ -426,7 +474,8 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
     /**
-     *
+     * Take a url and instantiate it onto a jLabel
+     * @author Daniel Lawless
      * @param url
      * @throws IOException
      */
@@ -449,7 +498,11 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
-
+    /**
+     * This method sets the dimensions of the panels based on the amount of panels required and adds them to
+     * the main panel via the addComponent method.
+     * @author Daniel Lawless
+     */
     private void layoutPanels()
     {
         //init dimension vars
@@ -513,7 +566,9 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
-    
+    /**
+     * This method overrides the runnable abstract method and catches the programs exceptions
+     */
     @Override
     public void run() {
         try {
@@ -529,6 +584,11 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
 
     /**
+     *
+     * This method adds the components passed to the mainpanel using the passed parameters to format
+     * the layout
+     *
+     *
      *
      * @param component
      * @param layout
@@ -555,8 +615,15 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         //init bool and jFrame
         String bill = "";
         JFrame x = null;
+
+
+        Properties prop = new Properties();
+        FileInputStream in = new FileInputStream("src/server.props");
+        prop.load(in);
+        String port  = prop.getProperty("port");
+
         //test server connection
-        try{ bill = serverRetreival(); }
+        try{ bill = serverRetreival(port); }
         catch(Exception e) { e.printStackTrace();}
 
         while(true)
@@ -566,7 +633,7 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
             if(x!=null)
             {
 
-                try{ bill = serverRetreival(); }
+                try{ bill = serverRetreival(port); }
                 catch(Exception e) { e.printStackTrace();}
                 //temp instance
                 JFrame e = null;
@@ -593,7 +660,7 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
             }
             else {
-                try{ bill = serverRetreival(); }
+                try{ bill = serverRetreival(port); }
                 catch(Exception e) { e.printStackTrace();}
                 if (bill == "") {
                     x = new Billboard_Viewer("Error Screen", true, "");
@@ -610,7 +677,7 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
     }
 
 
-    public static String serverRetreival() throws Exception {
+    public static String serverRetreival(String port) throws Exception {
 
         CurrentBillboardRequest request = new CurrentBillboardRequest();
         Socket socket = new Socket("127.0.0.1", 4444);
