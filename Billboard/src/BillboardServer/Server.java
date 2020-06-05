@@ -3,6 +3,7 @@ package BillboardServer;
 import Helper.Billboard;
 import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
+import Helper.SessionToken;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -158,7 +159,7 @@ public class Server implements Runnable {
                 if (obj.getClass() == SessionToken.class) {
                     sessionTokens.add((SessionToken) obj);
 
-                    return ((SessionToken) obj).getSessionToken();
+                    return ((SessionToken) obj);
                 }
 
                 return obj;
@@ -214,7 +215,7 @@ public class Server implements Runnable {
                     // Check if user has required permissions
                     if (checkPermissions(con, sessionToken, permissionsRequired)) {
                         // Run insert or update
-                        Evaluate.EvaluateCreateEditBillboard(con, new Billboard(actualRequest.getBillboardName(), actualRequest.getBillboardContents(), sessionToken.getUserName()));
+                        return Evaluate.EvaluateCreateEditBillboard(con, new Billboard(actualRequest.getBillboardName(), actualRequest.getBillboardContents(), sessionToken.getUserName()));
                     } else {
                         return new ErrorMessage("Insufficient permissions");
                     }
@@ -250,7 +251,7 @@ public class Server implements Runnable {
                         // Check if user has required permissions
                         if (checkPermissions(con, sessionToken, permissionsRequired)) {
                             // Run insert or update
-                            Evaluate.EvaluateDeleteBillboard(con, billboard.getName());
+                            return Evaluate.EvaluateDeleteBillboard(con, billboard.getName());
                         } else {
                             return new ErrorMessage("Insufficient permissions");
                         }

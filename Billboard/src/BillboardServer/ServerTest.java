@@ -7,10 +7,10 @@ public class ServerTest {
             client.TestGetCurrentBillboard();
             String sessionToken = client.TestLogin();
             client.TestCreateBillboard(sessionToken);
-            client.TestScheduleBillboard(sessionToken);
-            client.TestViewSchedule(sessionToken);
-            client.TestCreateUser(sessionToken);
-            client.TestSetUserPermissions(sessionToken);
+//            client.TestScheduleBillboard(sessionToken);
+//            client.TestViewSchedule(sessionToken);
+//            client.TestCreateUser(sessionToken);
+//            client.TestSetUserPermissions(sessionToken);
         } catch (Exception e) {
             System.out.println(e);
         }

@@ -1,8 +1,9 @@
-package BillboardServer;
+package Helper;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class SessionToken {
+public class SessionToken implements Serializable {
     //region User
     private String userName;
 

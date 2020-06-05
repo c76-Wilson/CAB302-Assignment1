@@ -1,11 +1,9 @@
 package BillboardServer;
 
-import Helper.Billboard;
-import Helper.Password;
+import Helper.*;
 import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
-import Helper.ScheduledBillboard;
-import Helper.User;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
@@ -113,7 +111,7 @@ public class Evaluate {
         try {
             Statement statement = con.createStatement();
 
-            ResultSet billboardResult = statement.executeQuery("SELECT Name, CreatorName FROM billboards");
+            ResultSet billboardResult = statement.executeQuery("SELECT Name, CreatorName, XML FROM billboards");
 
             LinkedList<Billboard> billboards = new LinkedList<>();
 
@@ -383,11 +381,13 @@ public class Evaluate {
     public static Object EvaluateDeleteBillboard(Connection con, String name) {
         try{
             // SQL to delete associated schedules
-            String sql = String.format("DELETE FROM schedules WHERE BillboardName = '%s'; \r\n", name);
-            // SQL query to delete billboard
-            sql = sql.concat(String.format("DELETE FROM billboards WHERE Name = '%s';", name));
+            String sql = String.format("DELETE FROM schedules WHERE BillboardName = '%s';", name);
 
             Statement statement = con.createStatement();
+
+            statement.execute(sql);
+            // SQL query to delete billboard
+            sql = String.format("DELETE FROM billboards WHERE Name = '%s';", name);
 
             statement.execute(sql);
 

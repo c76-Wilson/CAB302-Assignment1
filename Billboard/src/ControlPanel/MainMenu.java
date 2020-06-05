@@ -1,57 +1,97 @@
 package ControlPanel;
 
+import Helper.SessionToken;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
 
-public class MainMenu extends JFrame {
-    // Frames
-    private CreateBillboard createBillboard;
+public class MainMenu extends JFrame{
+    // Session Token
+    SessionToken sessionToken;
+    int serverPort;
+    String serverIP;
 
     // Panels
-    JPanel mainPanel;
+    JPanel mainPanel = new JPanel();;
+    JPanel menu;
+    BillboardList billboardList;
+
+    // Layout
+    CardLayout layout = new CardLayout();
 
     // Components
     JButton billboards;
     JButton schedules;
     JButton users;
+    JButton logout;
 
-    public MainMenu(Dimension size){
+    JButton mainMenu;
+
+    public MainMenu(Dimension size, SessionToken sessionToken, String serverIP, int serverPort){
         super("Main Menu");
-        initMenu(size);
+        this.sessionToken = sessionToken;
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+        setSize(size);
+
+        menu = new JPanel();
+        billboardList = new BillboardList(getSize(), sessionToken, serverIP, serverPort);
+
+        mainPanel.setLayout(layout);
+
+        initMenu();
+
+        setResizable(false);
+        setLocationRelativeTo(null);
+        setVisible(true);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        requestFocus();
     }
 
-    private void initMenu(Dimension size) {
-        setLayout(new GridLayout(3, 1));
-        setSize(size);
-        setBackground(Color.LIGHT_GRAY);
+    private void initMenu() {
+        menu.setLayout(new GridLayout(4, 1));
 
         billboards = new JButton("Billboards");
         billboards.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (createBillboard == null) {
-                    createBillboard = new CreateBillboard(size);
-                    createBillboard.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-                    createBillboard.setVisible(true);
-                }
-                else if (!createBillboard.isVisible()){
-                    createBillboard.setVisible(true);
-                }
+                layout.show(mainPanel, "Billboards");
             }
         });
         schedules = new JButton("Schedules");
         users = new JButton("Users");
+        logout = new JButton("Logout");
+        logout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sessionToken = null;
 
-        add(billboards);
-        add(schedules);
-        add(users);
-    }
+                Login login = new Login();
+                dispose();
+                login.setVisible(true);
+            }
+        });
+        mainMenu = new JButton("Main Menu");
+        mainMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                layout.show(mainPanel, "Menu");
+            }
+        });
 
-    public static void main(String[] args){
-        MainMenu menu = new MainMenu(new Dimension(1000, 1000));
-        menu.setVisible(true);
+        menu.add(billboards);
+        menu.add(schedules);
+        menu.add(users);
+        menu.add(logout);
+
+        billboardList.add(mainMenu);
+
+        mainPanel.add(menu, "Menu");
+        mainPanel.add(billboardList, "Billboards");
+
+        add(mainPanel);
+        layout.show(mainPanel, "Menu");
     }
 }

@@ -14,8 +14,6 @@ public class Password {
 
         String hashedPassword = Base64.getUrlEncoder().withoutPadding().encodeToString(md.digest());
 
-        System.out.println(hashedPassword);
-
         return hashedPassword;
     }
 

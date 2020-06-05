@@ -43,6 +43,11 @@ public class PreviewViewer extends JPanel{
         this.panelSize = panelSize;
 
         this.setupPreview();
+
+        this.setBackground(backgroundColour);
+        messagePanel.setBackground(backgroundColour);
+        infoPanel.setBackground(backgroundColour);
+        imagePanel.setBackground(backgroundColour);
     }
 
     private void setupPreview(){
@@ -54,9 +59,9 @@ public class PreviewViewer extends JPanel{
 
         this.backgroundColour = backgroundColour;
 
-        if(!imageLocation.isBlank())
+        if(imageLocation != null && !imageLocation.isBlank())
         {
-            if (Pattern.matches("[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", imageLocation)){
+            if (Pattern.matches("(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,}|[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})", imageLocation)){
                 createImageFromURL(imageLocation);
             }
             else{
@@ -65,7 +70,7 @@ public class PreviewViewer extends JPanel{
             pictureExists = true;
         }
 
-        if(!messageText.isBlank()) {
+        if(messageText != null && !messageText.isBlank()) {
             if(messageColour != null)
             {
                 createMsgLabel(messageText,messageColour);
@@ -77,7 +82,7 @@ public class PreviewViewer extends JPanel{
             messageExists = true;
         }
 
-        if(!infoText.isBlank()) {
+        if(infoText != null && !infoText.isBlank()) {
             if(infoColour != null)
             {
                 createInfoLabel(infoText,infoColour);
@@ -93,9 +98,9 @@ public class PreviewViewer extends JPanel{
 
     private int getNumPanels(){
         int num_panels = 0;
-        if (!imageLocation.isBlank()){num_panels++;}
-        if (!messageText.isBlank()){num_panels++;}
-        if (!infoText.isBlank()){num_panels++;}
+        if (imageLocation != null && !imageLocation.isBlank()){num_panels++;}
+        if (messageText != null && !messageText.isBlank()){num_panels++;}
+        if (infoText != null && !infoText.isBlank()){num_panels++;}
         return num_panels;
     }
 
@@ -109,9 +114,7 @@ public class PreviewViewer extends JPanel{
             BufferedImage img = ImageIO.read(image_link);
             Dimension img_dimen = getScaledImage(img,bounds);
 
-            Image temp_img = img.getScaledInstance((int)img_dimen.getWidth(),
-                    (int)img_dimen.getHeight(),
-                    Image.SCALE_SMOOTH);
+            Image temp_img = img.getScaledInstance((int)img_dimen.getWidth(), (int)img_dimen.getHeight(), Image.SCALE_SMOOTH);
 
             ImageIcon icon = new ImageIcon(temp_img);
 
@@ -283,7 +286,7 @@ public class PreviewViewer extends JPanel{
 
         this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         //set the size of the panels
-        if(messageExists && msg_size != null)
+        if(messageExists)
         {
             messagePanel.setPreferredSize(msg_size);
             messagePanel.add(messageLabel);
@@ -292,17 +295,25 @@ public class PreviewViewer extends JPanel{
             messagePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             this.add(messagePanel);
         }
-        if(pictureExists && pic_size != null)
+        if(pictureExists)
         {
             imagePanel.setPreferredSize(pic_size);
-            imagePanel.add(imageLabel);
             imagePanel.setLayout(new BoxLayout(imagePanel,BoxLayout.Y_AXIS));
-            this.add(Box.createVerticalGlue());
+            imagePanel.add(imageLabel);
+            if (messageExists || infoExists) {
+                this.add(Box.createVerticalGlue());
+            }
             this.add(imagePanel);
             imagePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            imagePanel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+
+            if (!messageExists && !infoExists){
+                imagePanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+            }
+            else {
+                imagePanel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+            }
         }
-        if(infoExists && info_size != null) {
+        if(infoExists) {
             infoPanel.setPreferredSize(info_size);
             infoPanel.add(informationLabel);
             infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
