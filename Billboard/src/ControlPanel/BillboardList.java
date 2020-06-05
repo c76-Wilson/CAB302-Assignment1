@@ -89,6 +89,7 @@ public class BillboardList extends JPanel {
                     Billboard billboard = getBillboard(billboardList.getSelectedValue().getName());
                     createBillboard = new CreateBillboard(getSize(), serverIP, serverPort, sessionToken, billboard.getName(), billboard.getXml());
                     createBillboard.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    createBillboard.setVisible(true);
                     createBillboard.setTitle("Edit Billboard");
                 }
                 else if (!createBillboard.isVisible()){
@@ -325,6 +326,5 @@ class BillboardRenderer extends BillboardPanel implements ListCellRenderer<Billb
         setBillboard(value);
         return this;
     }
-
 }
 

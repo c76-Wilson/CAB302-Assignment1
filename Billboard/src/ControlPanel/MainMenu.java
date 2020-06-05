@@ -18,6 +18,7 @@ public class MainMenu extends JFrame{
     JPanel menu;
     BillboardList billboardList;
     UserList userList;
+    ScheduleList scheduleList;
 
     // Layout
     CardLayout layout = new CardLayout();
@@ -39,7 +40,6 @@ public class MainMenu extends JFrame{
 
         menu = new JPanel();
         billboardList = new BillboardList(getSize(), sessionToken, serverIP, serverPort);
-        userList = new UserList(getSize(), sessionToken, serverIP, serverPort);
 
         mainPanel.setLayout(layout);
 
@@ -62,9 +62,26 @@ public class MainMenu extends JFrame{
                 layout.show(mainPanel, "Billboards");
             }
         });
-        schedules = new JButton("Schedules");
+        schedules = new JButton("Schedule");
+        schedules.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                scheduleList = new ScheduleList(getSize(), sessionToken, serverIP, serverPort);
+                scheduleList.add(mainMenu);
+                mainPanel.add(scheduleList, "Schedule");
+                layout.show(mainPanel, "Schedule");
+            }
+        });
         users = new JButton("Users");
-        users.addActionListener(e -> layout.show(mainPanel, "Users"));
+        users.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                userList = new UserList(getSize(), sessionToken, serverIP, serverPort);
+                userList.add(mainMenu);
+                mainPanel.add(userList, "Users");
+                layout.show(mainPanel, "Users");
+            }
+        });
         logout = new JButton("Logout");
         logout.addActionListener(new ActionListener() {
             @Override
@@ -93,7 +110,6 @@ public class MainMenu extends JFrame{
 
         mainPanel.add(menu, "Menu");
         mainPanel.add(billboardList, "Billboards");
-        mainPanel.add(userList, "Users");
 
         add(mainPanel);
         layout.show(mainPanel, "Menu");
