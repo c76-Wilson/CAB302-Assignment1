@@ -34,12 +34,12 @@ public class MainMenu extends JFrame{
 
     JButton mainMenu;
 
-    public MainMenu(Dimension size, SessionToken sessionToken, String serverIP, int serverPort){
+    public MainMenu(SessionToken sessionToken, String serverIP, int serverPort){
         super("Main Menu");
         this.sessionToken = sessionToken;
         this.serverIP = serverIP;
         this.serverPort = serverPort;
-        setSize(size);
+        setSize(1280, 720);
 
         menu = new JPanel();
 
@@ -58,24 +58,20 @@ public class MainMenu extends JFrame{
         menu.setLayout(new GridLayout(5, 1));
 
         billboards = new JButton("Billboards");
-        billboards.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                billboardList = new BillboardList(getSize(), sessionToken, serverIP, serverPort);
-                billboardList.add(mainMenu);
-                mainPanel.add(billboardList, "Billboards");
-                layout.show(mainPanel, "Billboards");
-            }
+        billboards.addActionListener(e -> {
+            billboardList = new BillboardList(getSize(), sessionToken, serverIP, serverPort);
+            billboardList.add(mainMenu);
+            mainPanel.add(billboardList, "Billboards");
+            layout.show(mainPanel, "Billboards");
+            billboardList.setVisible(true);
+            billboardList.setTitle("Billboards");
         });
         schedules = new JButton("Schedule");
-        schedules.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                scheduleList = new ScheduleList(getSize(), sessionToken, serverIP, serverPort);
-                scheduleList.add(mainMenu);
-                mainPanel.add(scheduleList, "Schedule");
-                layout.show(mainPanel, "Schedule");
-            }
+        schedules.addActionListener(e -> {
+            scheduleList = new ScheduleList(getSize(), sessionToken, serverIP, serverPort);
+            scheduleList.add(mainMenu);
+            mainPanel.add(scheduleList, "Schedule");
+            layout.show(mainPanel, "Schedule");
         });
         users = new JButton("Users");
         users.addActionListener(new ActionListener() {
@@ -88,24 +84,21 @@ public class MainMenu extends JFrame{
             }
         });
         setPassword = new JButton("Change Your Password");
-        setPassword.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (changePassword == null) {
-                    changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
-                    changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-                    changePassword.setVisible(true);
-                    changePassword.setTitle("Change Password");
-                }
-                else if (!changePassword.isVisible()){
-                    changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
-                    changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-                    changePassword.setVisible(true);
-                    changePassword.setTitle("Change Password");
-                }
+        setPassword.addActionListener(e -> {
+            if (changePassword == null) {
                 changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
-                changePassword.add(mainMenu);
+                changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                changePassword.setVisible(true);
+                changePassword.setTitle("Change Password");
             }
+            else if (!changePassword.isVisible()){
+                changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
+                changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                changePassword.setVisible(true);
+                changePassword.setTitle("Change Password");
+            }
+            changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
+            changePassword.add(mainMenu);
         });
         logout = new JButton("Logout");
         logout.addActionListener(new ActionListener() {

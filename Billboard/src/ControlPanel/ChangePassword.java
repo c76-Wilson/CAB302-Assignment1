@@ -62,20 +62,17 @@ public class ChangePassword extends JDialog {
 
         // Submit button
         submitButton = new JButton("Change Password");
-        submitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!new String(setPasswordField.getPassword()).isBlank()){
-                    SetUserPasswordRequest request = new SetUserPasswordRequest(userName != null ? userName : sessionToken.getUserName(), Password.hash(new String(setPasswordField.getPassword())), sessionToken.getSessionToken());
+        submitButton.addActionListener( e -> {
+            if (!new String(setPasswordField.getPassword()).isBlank()){
+                SetUserPasswordRequest request = new SetUserPasswordRequest(userName != null ? userName : sessionToken.getUserName(), Password.hash(new String(setPasswordField.getPassword())), sessionToken.getSessionToken());
 
-                    updatePassword(request);
-                }
-                else{
-                    JOptionPane.showMessageDialog((JFrame) SwingUtilities.getRoot((Component)e.getSource()),
-                            "Password cannot be blank!",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
+                updatePassword(request);
+            }
+            else{
+                JOptionPane.showMessageDialog(SwingUtilities.getRoot((Component)e.getSource()),
+                        "Password cannot be blank!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 

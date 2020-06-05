@@ -274,6 +274,11 @@ public class BillboardList extends JPanel {
 
         return null;
     }
+
+    public void setTitle(String billboards) {
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        frame.setTitle(billboards);
+    }
 }
 
 class BillboardPanel extends JPanel{

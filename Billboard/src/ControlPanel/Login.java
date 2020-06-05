@@ -41,7 +41,7 @@ public class Login extends JFrame{
     public Login(){
         super("Login");
         getServerIPAndPort();
-        setSize(new Dimension(720, 720));
+        setSize(new Dimension(300, 300));
         setupInputs();
     }
 
@@ -109,7 +109,7 @@ public class Login extends JFrame{
                 String pass = new String(password.getPassword());
                 try {
                     if (tryLogin(user, pass)) {
-                        MainMenu menu = new MainMenu(getSize(), sessionToken, serverIP, serverPort);
+                        MainMenu menu = new MainMenu(sessionToken, serverIP, serverPort);
 
                         username = null;
                         password = null;
@@ -154,10 +154,6 @@ public class Login extends JFrame{
             sessionToken = ((SessionToken) obj);
             return true;
         } else {
-            JOptionPane.showMessageDialog(this,
-                    ((ErrorMessage)obj).getErrorMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
