@@ -675,19 +675,23 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
 
 
     public static String serverRetreival(String port) throws Exception {
+        try {
+            CurrentBillboardRequest request = new CurrentBillboardRequest();
+            Socket socket = new Socket("127.0.0.1", 4444);
 
-        CurrentBillboardRequest request = new CurrentBillboardRequest();
-        Socket socket = new Socket("127.0.0.1", 4444);
+            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
-        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            output.writeObject(request);
 
-        output.writeObject(request);
+            ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+            Object obj = clientInputStream.readObject();
 
-        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
-        Object obj = clientInputStream.readObject();
-
-        if (obj.getClass() == String.class){
-            return (String)obj;
+            if (obj.getClass() == String.class) {
+                return (String) obj;
+            }
+        }
+        catch (Exception e){
+            
         }
 
         return "";
