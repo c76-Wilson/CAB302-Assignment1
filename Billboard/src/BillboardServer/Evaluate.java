@@ -30,7 +30,7 @@ public class Evaluate {
             ResultSet scheduleResult = statement.executeQuery(sql);
 
             if (scheduleResult.next()) {
-                ResultSet billboardResult = statement.executeQuery(String.format("SELECT * FROM billboards WHERE Name = %d LIMIT 1", scheduleResult.getInt("BillboardName")));
+                ResultSet billboardResult = statement.executeQuery(String.format("SELECT * FROM billboards WHERE Name = '%s' LIMIT 1", scheduleResult.getString("BillboardName")));
 
                 if (billboardResult.next()) {
                     return ConvertResultSetToBillboard(billboardResult);

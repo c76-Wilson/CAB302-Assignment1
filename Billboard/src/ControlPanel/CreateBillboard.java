@@ -444,6 +444,7 @@ public class CreateBillboard extends JDialog {
                         infoColour = Color.decode(str_color_code);
                     }
                 }
+                xmlFile.delete();
             }
         }
         catch (Exception e){

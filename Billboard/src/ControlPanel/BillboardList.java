@@ -27,12 +27,14 @@ public class BillboardList extends JPanel {
 
     // Dialogs
     JDialog createBillboard;
+    JDialog scheduleBillboard;
 
     // Components
     JList<Billboard> billboardList;
     JButton createButton;
     JButton editButton;
     JButton deleteButton;
+    JButton scheduleButton;
 
     public BillboardList(Dimension size, SessionToken sessionToken, String serverIP, int serverPort) {
         this.sessionToken = sessionToken;
@@ -61,10 +63,14 @@ public class BillboardList extends JPanel {
                     if (billboardList.getSelectedIndex() == -1) {
                         //No selection, disable fire button.
                         editButton.setEnabled(false);
+                        scheduleButton.setEnabled(false);
+                        deleteButton.setEnabled(false);
 
                     } else {
                         //Selection, enable the fire button.
                         editButton.setEnabled(true);
+                        scheduleButton.setEnabled(true);
+                        deleteButton.setEnabled(true);
                     }
                 }
             }
@@ -75,6 +81,7 @@ public class BillboardList extends JPanel {
         add(scrollPane);
 
         editButton = new JButton("Edit");
+        editButton.setEnabled(false);
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -82,11 +89,13 @@ public class BillboardList extends JPanel {
                     Billboard billboard = getBillboard(billboardList.getSelectedValue().getName());
                     createBillboard = new CreateBillboard(getSize(), serverIP, serverPort, sessionToken, billboard.getName(), billboard.getXml());
                     createBillboard.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    createBillboard.setTitle("Edit Billboard");
                 }
                 else if (!createBillboard.isVisible()){
                     Billboard billboard = getBillboard(billboardList.getSelectedValue().getName());
                     createBillboard = new CreateBillboard(getSize(), serverIP, serverPort, sessionToken, billboard.getName(), billboard.getXml());
                     createBillboard.setVisible(true);
+                    createBillboard.setTitle("Edit Billboard");
                 }
 
                 DefaultListModel<Billboard> newModel = new DefaultListModel<>();
@@ -108,10 +117,12 @@ public class BillboardList extends JPanel {
                     createBillboard = new CreateBillboard(getSize(), serverIP, serverPort, sessionToken);
                     createBillboard.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
                     createBillboard.setVisible(true);
+                    createBillboard.setTitle("Create Billboard");
                 }
                 else if (!createBillboard.isVisible()){
                     createBillboard = new CreateBillboard(getSize(), serverIP, serverPort, sessionToken);
                     createBillboard.setVisible(true);
+                    createBillboard.setTitle("Create Billboard");
                 }
 
                 DefaultListModel<Billboard> newModel = new DefaultListModel<>();
@@ -126,6 +137,7 @@ public class BillboardList extends JPanel {
         });
 
         deleteButton = new JButton("Delete");
+        deleteButton.setEnabled(false);
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -142,8 +154,29 @@ public class BillboardList extends JPanel {
                 repaint();
             }
         });
+
+        scheduleButton = new JButton("Schedule");
+        scheduleButton.setEnabled(false);
+        scheduleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (scheduleBillboard == null) {
+                    Billboard billboard = getBillboard(billboardList.getSelectedValue().getName());
+                    scheduleBillboard = new ScheduleBillboard(getSize(), serverIP, serverPort, sessionToken, billboard.getName());
+                    scheduleBillboard.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    scheduleBillboard.setVisible(true);
+                }
+                else if (!scheduleBillboard.isVisible()){
+                    Billboard billboard = getBillboard(billboardList.getSelectedValue().getName());
+                    scheduleBillboard = new ScheduleBillboard(getSize(), serverIP, serverPort, sessionToken, billboard.getName());
+                    scheduleBillboard.setVisible(true);
+                }
+            }
+        });
+
         add(createButton);
         add(editButton);
+        add(scheduleButton);
         add(deleteButton);
     }
 

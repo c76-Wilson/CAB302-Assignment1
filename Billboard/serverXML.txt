@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<billboard background="#006666">
-	<message colour="#000000">IT WORRKSKKSSK</message><picture url="https://s31242.pcdn.co/wp-content/uploads/2019/06/Please-Clap-Shopped-1024x474.jpg" />	<information colour="#000000">GOD BLESS</information>
+<billboard background="#009999">
+	<message colour="#000000">IT WORKS!!!</message><picture url="https://s31242.pcdn.co/wp-content/uploads/2019/06/Please-Clap-Shopped-1024x474.jpg" />	<information colour="#000000">Please clap</information>
 </billboard>
