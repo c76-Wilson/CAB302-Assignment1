@@ -1,6 +1,5 @@
 package ControlPanel;
 
-import Helper.Billboard;
 import Helper.SessionToken;
 
 import javax.swing.*;
@@ -114,7 +113,7 @@ public class MainMenu extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 sessionToken = null;
 
-                Login login = new Login();
+                ControlPanel login = new ControlPanel();
                 dispose();
                 login.setVisible(true);
             }

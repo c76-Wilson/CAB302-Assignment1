@@ -20,7 +20,7 @@ import java.util.Properties;
 /**
  * This Class Setups the Control Panel
  */
-public class Login extends JFrame{
+public class ControlPanel extends JFrame{
     // Server port
     int serverPort;
     String serverIP;
@@ -38,7 +38,7 @@ public class Login extends JFrame{
     // Panel
     JPanel loginPanel;
 
-    public Login(){
+    public ControlPanel(){
         super("Login");
         getServerIPAndPort();
         setSize(new Dimension(720, 720));
@@ -163,7 +163,7 @@ public class Login extends JFrame{
     }
 
     public static void main(String[] args){
-        Login login = new Login();
+        ControlPanel login = new ControlPanel();
         login.setVisible(true);
     }
 }
