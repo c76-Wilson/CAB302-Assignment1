@@ -20,6 +20,7 @@ public class MainMenu extends JFrame{
     BillboardList billboardList;
     UserList userList;
     ScheduleList scheduleList;
+    ScheduleCalendar scheduleCalendar;
     ChangePassword changePassword;
 
     // Layout
@@ -71,9 +72,9 @@ public class MainMenu extends JFrame{
         schedules.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                scheduleList = new ScheduleList(getSize(), sessionToken, serverIP, serverPort);
-                scheduleList.add(mainMenu);
-                mainPanel.add(scheduleList, "Schedule");
+                scheduleCalendar = new ScheduleCalendar(getSize(), sessionToken, serverIP, serverPort);
+                scheduleCalendar.add(mainMenu, BorderLayout.SOUTH);
+                mainPanel.add(scheduleCalendar, "Schedule");
                 layout.show(mainPanel, "Schedule");
             }
         });
