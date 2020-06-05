@@ -23,7 +23,10 @@ import java.util.logging.ErrorManager;
 
 public class CreateUser extends JDialog {
     //Create User Components
+<<<<<<< HEAD
     private JPanel userPanel;
+=======
+>>>>>>> b0b0acfc9db8606701fac3fed7a94207e89c7e9e
     private GridBagConstraints userGrid;
     private JLabel labelUser;
     private JLabel labelPass;
@@ -58,12 +61,15 @@ public class CreateUser extends JDialog {
 
     private void createUser(Dimension window) {
         setSize(window);
+<<<<<<< HEAD
 
         userPanel = new JPanel(new GridBagLayout());
         add(userPanel);
         userPanel.setVisible(true);
+=======
         setLayout(new GridBagLayout());
         setTitle("Create User");
+>>>>>>> b0b0acfc9db8606701fac3fed7a94207e89c7e9e
 
         userGrid = new GridBagConstraints();
 
@@ -71,7 +77,7 @@ public class CreateUser extends JDialog {
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 0;
         userGrid.gridy = 0;
-        userPanel.add(labelUser, userGrid);
+        add(labelUser, userGrid);
 
         setUsername = new JTextField(20);
         setUsername.setDocument(new PlainDocument() {
@@ -89,26 +95,35 @@ public class CreateUser extends JDialog {
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 1;
         userGrid.gridy = 0;
+<<<<<<< HEAD
         userGrid.gridwidth = 2;
         userPanel.add(setUsername, userGrid);
+=======
+        add(setUsername, userGrid);
+>>>>>>> b0b0acfc9db8606701fac3fed7a94207e89c7e9e
 
         nameCount = new JLabel(nameChars + " / 50 Characters");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 2;
         userGrid.gridy = 0;
+<<<<<<< HEAD
         userGrid.gridwidth = 1;
         userPanel.add(nameCount, userGrid);
+=======
+        add(nameCount, userGrid);
+>>>>>>> b0b0acfc9db8606701fac3fed7a94207e89c7e9e
 
         labelPass = new JLabel("Password: ");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 0;
         userGrid.gridy = 1;
-        userPanel.add(labelPass, userGrid);
+        add(labelPass, userGrid);
 
         setPassword = new JPasswordField(20);
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 1;
         userGrid.gridy = 1;
+<<<<<<< HEAD
         userGrid.gridwidth = 2;
         userPanel.add(setPassword, userGrid);
 
@@ -123,24 +138,49 @@ public class CreateUser extends JDialog {
         userGrid.gridx = 4;
         userGrid.gridy = 0;
         userPanel.add(enableEdit, userGrid);
+=======
+        add(setPassword, userGrid);
+
+        enableCreate = new JCheckBox("Create Billboards");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 0;
+        userGrid.gridy = 2;
+        add(enableCreate, userGrid);
+
+        enableEdit = new JCheckBox("Edit All Billboards");
+        userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.gridx = 1;
+        userGrid.gridy = 2;
+        add(enableEdit, userGrid);
+>>>>>>> b0b0acfc9db8606701fac3fed7a94207e89c7e9e
 
         enableSchedule = new JCheckBox("Schedule Billboards");
         userGrid.gridx = 3;
+<<<<<<< HEAD
         userGrid.gridy = 1;
         userPanel.add(enableSchedule, userGrid);
+=======
+        userGrid.gridy = 2;
+        add(enableSchedule, userGrid);
+>>>>>>> b0b0acfc9db8606701fac3fed7a94207e89c7e9e
 
         enableUser = new JCheckBox("Edit Users");
         userGrid.gridx = 4;
+<<<<<<< HEAD
         userGrid.gridy = 1;
         userPanel.add(enableUser, userGrid);
+=======
+        userGrid.gridy = 2;
+        add(enableUser, userGrid);
+>>>>>>> b0b0acfc9db8606701fac3fed7a94207e89c7e9e
 
         userMake = new JButton("Create User");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.anchor = GridBagConstraints.CENTER;
         userGrid.gridwidth = GridBagConstraints.REMAINDER;
-        userGrid.gridx = 0;
+        userGrid.gridx = 2;
         userGrid.gridy = 3;
-        userPanel.add(userMake, userGrid);
+        add(userMake, userGrid);
 
         CheckListener checkL = new CheckListener();
         enableCreate.addItemListener(checkL);
@@ -155,8 +195,11 @@ public class CreateUser extends JDialog {
                 ex.printStackTrace();
             }
         });
+<<<<<<< HEAD
 
         setVisible(true);
+=======
+>>>>>>> b0b0acfc9db8606701fac3fed7a94207e89c7e9e
     }
 
     private void makeUser() throws Exception {

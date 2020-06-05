@@ -17,6 +17,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Properties;
 
+/**
+ * This Class Setups the Control Panel
+ */
 public class Login extends JFrame{
     // Server port
     int serverPort;
