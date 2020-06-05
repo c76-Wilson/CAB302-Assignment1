@@ -17,6 +17,7 @@ public class MainMenu extends JFrame{
     JPanel mainPanel = new JPanel();;
     JPanel menu;
     BillboardList billboardList;
+    UserList userList;
 
     // Layout
     CardLayout layout = new CardLayout();
@@ -38,6 +39,7 @@ public class MainMenu extends JFrame{
 
         menu = new JPanel();
         billboardList = new BillboardList(getSize(), sessionToken, serverIP, serverPort);
+        userList = new UserList(getSize(), sessionToken, serverIP, serverPort);
 
         mainPanel.setLayout(layout);
 
@@ -62,6 +64,7 @@ public class MainMenu extends JFrame{
         });
         schedules = new JButton("Schedules");
         users = new JButton("Users");
+        users.addActionListener(e -> layout.show(mainPanel, "Users"));
         logout = new JButton("Logout");
         logout.addActionListener(new ActionListener() {
             @Override
@@ -90,6 +93,7 @@ public class MainMenu extends JFrame{
 
         mainPanel.add(menu, "Menu");
         mainPanel.add(billboardList, "Billboards");
+        mainPanel.add(userList, "Users");
 
         add(mainPanel);
         layout.show(mainPanel, "Menu");

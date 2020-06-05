@@ -96,6 +96,12 @@ public class ControlFrame implements ActionListener {
     private JCheckBox enableSchedule;
     private JCheckBox enableUser;
 
+    // Create Edit User Components
+    private JFrame editFrame;
+    private JPanel editPanel;
+    private GridBagConstraints editGrid;
+    private JTable userTable;
+
     //Create User Variables
     private String nameUser = "";
     private int nameChars = 0;
@@ -739,6 +745,33 @@ public class ControlFrame implements ActionListener {
         frame.setVisible(true);
     }
 
+    private void editUsers(){
+        editFrame = new JFrame("Edit Users");
+        editFrame.setSize(700, 500);
+        editFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        editPanel = new JPanel(new GridBagLayout());
+        editFrame.add(editPanel);
+        editPanel.setVisible(true);
+
+        editGrid = new GridBagConstraints();
+
+        ListUsersRequest list = new ListUsersRequest(sessionToken);
+
+
+
+
+        editGrid.fill = GridBagConstraints.VERTICAL;
+        editGrid.gridx = 0;
+        editGrid.gridy = 0;
+        editPanel.add(userTable, editGrid);
+
+
+
+        editFrame.setVisible(true);
+
+    }
+
     private void createUser() {
         userFrame = new JFrame("Create User");
         userFrame.setSize(700, 500);
@@ -1028,7 +1061,7 @@ public class ControlFrame implements ActionListener {
             } else if (e.getActionCommand() == "Create"){
                 createUser();
             } else if (e.getActionCommand() == "Edit"){
-
+                editUsers();
             } else if (e.getActionCommand() == "View Billboard"){
 
             } else if (e.getActionCommand() == "View Schedule"){
