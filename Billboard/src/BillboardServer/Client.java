@@ -48,7 +48,7 @@ public class Client {
     public void TestCreateBillboard(String sessionToken) throws Exception {
         Socket socket = new Socket("127.0.0.1", 4444);
 
-        CreateEditBillboardRequest createEditBillboardRequest = new CreateEditBillboardRequest(sessionToken, "Test", new String(Files.readAllBytes(Paths.get("src\\BillboardViewer\\control.xml"))));
+        CreateEditBillboardRequest createEditBillboardRequest = new CreateEditBillboardRequest(sessionToken, "Test3", new String(Files.readAllBytes(Paths.get("src\\BillboardViewer\\control.xml"))));
 
         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 

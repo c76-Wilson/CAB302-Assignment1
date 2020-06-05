@@ -1,57 +1,136 @@
 package ControlPanel;
 
+import Helper.SessionToken;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
 
-public class MainMenu extends JFrame {
-    // Frames
-    private CreateBillboard createBillboard;
+public class MainMenu extends JFrame{
+    // Session Token
+    SessionToken sessionToken;
+    int serverPort;
+    String serverIP;
 
     // Panels
-    JPanel mainPanel;
+    JPanel mainPanel = new JPanel();;
+    JPanel menu;
+    BillboardList billboardList;
+    UserList userList;
+    ScheduleList scheduleList;
+    ScheduleCalendar scheduleCalendar;
+    ChangePassword changePassword;
+
+    // Layout
+    CardLayout layout = new CardLayout();
 
     // Components
     JButton billboards;
     JButton schedules;
     JButton users;
+    JButton setPassword;
+    JButton logout;
 
-    public MainMenu(Dimension size){
+    JButton mainMenu;
+
+    public MainMenu(Dimension size, SessionToken sessionToken, String serverIP, int serverPort){
         super("Main Menu");
-        initMenu(size);
+        this.sessionToken = sessionToken;
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+        setSize(size);
+
+        menu = new JPanel();
+
+        mainPanel.setLayout(layout);
+
+        initMenu();
+
+        setResizable(false);
+        setLocationRelativeTo(null);
+        setVisible(true);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        requestFocus();
     }
 
-    private void initMenu(Dimension size) {
-        setLayout(new GridLayout(3, 1));
-        setSize(size);
-        setBackground(Color.LIGHT_GRAY);
+    private void initMenu() {
+        menu.setLayout(new GridLayout(5, 1));
 
         billboards = new JButton("Billboards");
         billboards.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (createBillboard == null) {
-                    createBillboard = new CreateBillboard(size);
-                    createBillboard.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-                    createBillboard.setVisible(true);
-                }
-                else if (!createBillboard.isVisible()){
-                    createBillboard.setVisible(true);
-                }
+                billboardList = new BillboardList(getSize(), sessionToken, serverIP, serverPort);
+                billboardList.add(mainMenu);
+                mainPanel.add(billboardList, "Billboards");
+                layout.show(mainPanel, "Billboards");
             }
         });
-        schedules = new JButton("Schedules");
+        schedules = new JButton("Schedule");
+        schedules.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                scheduleCalendar = new ScheduleCalendar(getSize(), sessionToken, serverIP, serverPort);
+                scheduleCalendar.add(mainMenu, BorderLayout.SOUTH);
+                mainPanel.add(scheduleCalendar, "Schedule");
+                layout.show(mainPanel, "Schedule");
+            }
+        });
         users = new JButton("Users");
+        users.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                userList = new UserList(getSize(), sessionToken, serverIP, serverPort);
+                userList.add(mainMenu);
+                mainPanel.add(userList, "Users");
+                layout.show(mainPanel, "Users");
+            }
+        });
+        setPassword = new JButton("Change Your Password");
+        setPassword.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (changePassword == null) {
+                    changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
+                    changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    changePassword.setVisible(true);
+                    changePassword.setTitle("Change Password");
+                }
+                else if (!changePassword.isVisible()){
+                    changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
+                    changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    changePassword.setVisible(true);
+                    changePassword.setTitle("Change Password");
+                }
+                changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
+                changePassword.add(mainMenu);
+            }
+        });
+        logout = new JButton("Logout");
+        logout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sessionToken = null;
 
-        add(billboards);
-        add(schedules);
-        add(users);
-    }
+                ControlPanel login = new ControlPanel();
+                dispose();
+                login.setVisible(true);
+            }
+        });
+        mainMenu = new JButton("Main Menu");
+        mainMenu.addActionListener(e -> layout.show(mainPanel, "Menu"));
 
-    public static void main(String[] args){
-        MainMenu menu = new MainMenu(new Dimension(1000, 1000));
-        menu.setVisible(true);
+        menu.add(billboards);
+        menu.add(schedules);
+        menu.add(users);
+        menu.add(setPassword);
+        menu.add(logout);
+
+
+        mainPanel.add(menu, "Menu");
+
+        add(mainPanel);
+        layout.show(mainPanel, "Menu");
     }
 }

@@ -1,6 +1,8 @@
 package Helper;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     //region Name
     private String name;
 

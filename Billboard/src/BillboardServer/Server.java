@@ -3,6 +3,7 @@ package BillboardServer;
 import Helper.Billboard;
 import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
+import Helper.SessionToken;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -14,7 +15,7 @@ import java.util.*;
 public class Server implements Runnable {
 
     static int port = getServerPort();
-    Connection con;
+    static Connection con;
     Socket currentSocket;
     static LinkedList<SessionToken> sessionTokens = new LinkedList<>();
 
@@ -27,12 +28,6 @@ public class Server implements Runnable {
     Server(Socket currentSocket, LinkedList<SessionToken> tokens) {
         this.currentSocket = currentSocket;
         this.sessionTokens = tokens;
-
-        Properties properties = new Properties();
-
-        properties = getDBProperties();
-
-        this.con = ConnectToDatabase.connect(properties.getProperty("jdbc.url"), properties.getProperty("jdbc.schema"), properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
     }
 
     public static void main(String args[]) {
@@ -44,6 +39,12 @@ public class Server implements Runnable {
      */
     public static void runServer(){
         try {
+            Properties properties = new Properties();
+
+            properties = getDBProperties();
+
+            con = ConnectToDatabase.connect(properties.getProperty("jdbc.url"), properties.getProperty("jdbc.schema"), properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
+
             port = getServerPort();
 
             ServerSocket serverSocket = new ServerSocket(port);
@@ -158,7 +159,7 @@ public class Server implements Runnable {
                 if (obj.getClass() == SessionToken.class) {
                     sessionTokens.add((SessionToken) obj);
 
-                    return ((SessionToken) obj).getSessionToken();
+                    return ((SessionToken) obj);
                 }
 
                 return obj;
@@ -214,7 +215,7 @@ public class Server implements Runnable {
                     // Check if user has required permissions
                     if (checkPermissions(con, sessionToken, permissionsRequired)) {
                         // Run insert or update
-                        Evaluate.EvaluateCreateEditBillboard(con, new Billboard(actualRequest.getBillboardName(), actualRequest.getBillboardContents(), sessionToken.getUserName()));
+                        return Evaluate.EvaluateCreateEditBillboard(con, new Billboard(actualRequest.getBillboardName(), actualRequest.getBillboardContents(), sessionToken.getUserName()));
                     } else {
                         return new ErrorMessage("Insufficient permissions");
                     }
@@ -250,7 +251,7 @@ public class Server implements Runnable {
                         // Check if user has required permissions
                         if (checkPermissions(con, sessionToken, permissionsRequired)) {
                             // Run insert or update
-                            Evaluate.EvaluateDeleteBillboard(con, billboard.getName());
+                            return Evaluate.EvaluateDeleteBillboard(con, billboard.getName());
                         } else {
                             return new ErrorMessage("Insufficient permissions");
                         }
@@ -456,11 +457,14 @@ public class Server implements Runnable {
 
                 return true;
             }
-            return new ErrorMessage("Request not recognised!");
+            else {
+                return new ErrorMessage("Request not recognised!");
+            }
         }
         catch(Exception e){
             return new ErrorMessage(e.getMessage());
         }
+        return null;
     }
 
     /**

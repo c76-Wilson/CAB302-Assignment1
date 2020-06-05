@@ -684,11 +684,13 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         output.writeObject(request);
 
         ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
-        String xml = (String)clientInputStream.readObject();
+        Object obj = clientInputStream.readObject();
 
-        return xml;
+        if (obj.getClass() == String.class){
+            return (String)obj;
+        }
 
-        
+        return "";
     }
 
 

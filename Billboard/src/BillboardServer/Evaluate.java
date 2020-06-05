@@ -1,11 +1,9 @@
 package BillboardServer;
 
-import Helper.Billboard;
-import Helper.Password;
+import Helper.*;
 import Helper.Requests.*;
 import Helper.Responses.ErrorMessage;
-import Helper.ScheduledBillboard;
-import Helper.User;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
@@ -32,7 +30,7 @@ public class Evaluate {
             ResultSet scheduleResult = statement.executeQuery(sql);
 
             if (scheduleResult.next()) {
-                ResultSet billboardResult = statement.executeQuery(String.format("SELECT * FROM billboards WHERE Name = %d LIMIT 1", scheduleResult.getInt("BillboardName")));
+                ResultSet billboardResult = statement.executeQuery(String.format("SELECT * FROM billboards WHERE Name = '%s' LIMIT 1", scheduleResult.getString("BillboardName")));
 
                 if (billboardResult.next()) {
                     return ConvertResultSetToBillboard(billboardResult);
@@ -58,7 +56,7 @@ public class Evaluate {
         try {
             // Update schedules where passed schedule time and recurring
             Statement statement = con.createStatement();
-            String sql = String.format("UPDATE schedules SET StartTime = StartTime + INTERVAL RecurringEvery MINUTE WHERE ID IN (SELECT ID FROM schedules WHERE RecurringEvery != null AND StartTime + INTERVAL Duration MINUTE <= NOW());");
+            String sql = String.format("UPDATE schedules SET StartTime = StartTime + INTERVAL RecurringEvery MINUTE WHERE ID IN (SELECT ID FROM schedules WHERE RecurringEvery IS NOT null AND StartTime + INTERVAL Duration MINUTE <= NOW());");
             statement.executeQuery(sql);
         }
         catch (Exception e){
@@ -113,7 +111,7 @@ public class Evaluate {
         try {
             Statement statement = con.createStatement();
 
-            ResultSet billboardResult = statement.executeQuery("SELECT Name, CreatorName FROM billboards");
+            ResultSet billboardResult = statement.executeQuery("SELECT Name, CreatorName, XML FROM billboards");
 
             LinkedList<Billboard> billboards = new LinkedList<>();
 
@@ -189,9 +187,11 @@ public class Evaluate {
      * @return a list of billboards scheduled in the next 7 days if successful - otherwise returns ErrorMessage
      */
     public static Object EvaluateViewSchedule(Connection con){
+        UpdateNextScheduled(con);
+
         try {
             Statement statement = con.createStatement();
-            String sql = "SELECT b.Name, b.CreatorName, s.StartTime, s.Duration FROM schedules s LEFT JOIN billboards b ON s.BillboardName = b.Name WHERE s.StartTime + INTERVAL s.Duration MINUTE >= NOW() AND s.StartTime < NOW() + INTERVAL 7 DAY;";
+            String sql = "SELECT b.Name, b.CreatorName, s.StartTime, s.Duration FROM schedules s LEFT JOIN billboards b ON s.BillboardName = b.Name WHERE s.StartTime + INTERVAL s.Duration MINUTE >= NOW() AND s.StartTime < NOW() + INTERVAL 7 DAY ORDER BY s.StartTime ASC;";
 
             ResultSet scheduleResult = statement.executeQuery(sql);
 
@@ -383,11 +383,13 @@ public class Evaluate {
     public static Object EvaluateDeleteBillboard(Connection con, String name) {
         try{
             // SQL to delete associated schedules
-            String sql = String.format("DELETE FROM schedules WHERE BillboardName = '%s'; \r\n", name);
-            // SQL query to delete billboard
-            sql = sql.concat(String.format("DELETE FROM billboards WHERE Name = '%s';", name));
+            String sql = String.format("DELETE FROM schedules WHERE BillboardName = '%s';", name);
 
             Statement statement = con.createStatement();
+
+            statement.execute(sql);
+            // SQL query to delete billboard
+            sql = String.format("DELETE FROM billboards WHERE Name = '%s';", name);
 
             statement.execute(sql);
 

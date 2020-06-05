@@ -8,15 +8,19 @@ import java.util.Base64;
 
 public class Password {
 
-    public static String hash(String password) throws Exception{
-        MessageDigest md = MessageDigest.getInstance("SHA-512");
-        md.update(password.getBytes());
+    public static String hash(String password){
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            md.update(password.getBytes());
 
-        String hashedPassword = Base64.getUrlEncoder().withoutPadding().encodeToString(md.digest());
+            String hashedPassword = Base64.getUrlEncoder().withoutPadding().encodeToString(md.digest());
 
-        System.out.println(hashedPassword);
-
-        return hashedPassword;
+            return hashedPassword;
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return "";
     }
 
     public static String getSaltedHash(String password) throws Exception {
