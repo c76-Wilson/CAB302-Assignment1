@@ -15,7 +15,7 @@ import java.util.*;
 public class Server implements Runnable {
 
     static int port = getServerPort();
-    Connection con;
+    static Connection con;
     Socket currentSocket;
     static LinkedList<SessionToken> sessionTokens = new LinkedList<>();
 
@@ -28,12 +28,6 @@ public class Server implements Runnable {
     Server(Socket currentSocket, LinkedList<SessionToken> tokens) {
         this.currentSocket = currentSocket;
         this.sessionTokens = tokens;
-
-        Properties properties = new Properties();
-
-        properties = getDBProperties();
-
-        this.con = ConnectToDatabase.connect(properties.getProperty("jdbc.url"), properties.getProperty("jdbc.schema"), properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
     }
 
     public static void main(String args[]) {
@@ -45,6 +39,12 @@ public class Server implements Runnable {
      */
     public static void runServer(){
         try {
+            Properties properties = new Properties();
+
+            properties = getDBProperties();
+
+            con = ConnectToDatabase.connect(properties.getProperty("jdbc.url"), properties.getProperty("jdbc.schema"), properties.getProperty("jdbc.username"), properties.getProperty("jdbc.password"));
+
             port = getServerPort();
 
             ServerSocket serverSocket = new ServerSocket(port);
