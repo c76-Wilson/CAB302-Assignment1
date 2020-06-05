@@ -153,10 +153,16 @@ public class UserList extends JPanel {
                         JOptionPane.ERROR_MESSAGE);
             }
             else {
-                changePerms = new ChangePermissions(getSize(), serverIP, serverPort, sessionToken, user.getName());
-                changePerms.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-                changePerms.setVisible(true);
-                changePerms.setTitle("Change User Permissions");
+                if (changePerms == null) {
+                    changePerms = new ChangePermissions(getSize(), serverIP, serverPort, sessionToken, user.getName());
+                    changePerms.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    changePerms.setVisible(true);
+                    changePerms.setTitle("Change User Permissions");
+                }
+                else if (!changePassword.isVisible()){
+                    changePerms = new ChangePermissions(getSize(), serverIP, serverPort, sessionToken, user.getName());
+                    changePerms.setVisible(true);
+                }
             }
         });
         add(createButton);

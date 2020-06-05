@@ -67,13 +67,6 @@ public class MainMenu extends JFrame{
             billboardList.setTitle("Billboards");
         });
         schedules = new JButton("Schedule");
-<<<<<<< HEAD
-        schedules.addActionListener(e -> {
-            scheduleList = new ScheduleList(getSize(), sessionToken, serverIP, serverPort);
-            scheduleList.add(mainMenu);
-            mainPanel.add(scheduleList, "Schedule");
-            layout.show(mainPanel, "Schedule");
-=======
         schedules.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -82,7 +75,6 @@ public class MainMenu extends JFrame{
                 mainPanel.add(scheduleCalendar, "Schedule");
                 layout.show(mainPanel, "Schedule");
             }
->>>>>>> a42626de6163c8344a0738680e8c42b279230b3b
         });
         users = new JButton("Users");
         users.addActionListener(new ActionListener() {
