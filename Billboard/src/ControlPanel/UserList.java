@@ -1,5 +1,6 @@
 package ControlPanel;
 
+import Helper.Requests.SetUserPermissionsRequest;
 import Helper.User;
 import Helper.Requests.DeleteUserRequest;
 import Helper.Requests.GetUserPermissionsRequest;
@@ -21,19 +22,21 @@ import java.util.LinkedList;
 
 public class UserList extends JPanel {
     // Server/authentication
-    SessionToken sessionToken;
-    int serverPort;
-    String serverIP;
+    private final SessionToken sessionToken;
+    private final int serverPort;
+    private final String serverIP;
 
     // Dialogs
-    CreateUser createUsers;
-    ChangePassword changePassword;
+    private CreateUser createUsers;
+    private ChangePassword changePassword;
+    private ChangePermissions changePerms;
 
     // Components
     JList<User> userList;
-    JButton createButton;
-    JButton editButton;
-    JButton deleteButton;
+    private JButton createButton;
+    private JButton editButton;
+    private JButton deleteButton;
+    private JButton permsButton;
 
     public UserList(Dimension userSize, SessionToken sessionToken, String serverIP, int serverPort) {
         this.sessionToken = sessionToken;
@@ -48,7 +51,7 @@ public class UserList extends JPanel {
         DefaultListModel<User> usersModel = new DefaultListModel<>();
         usersModel.addAll(users);
 
-        userList = new JList<User>(usersModel);
+        userList = new JList<>(usersModel);
 
         userList.setVisibleRowCount(8);
         userList.setCellRenderer(new UserRenderer());
@@ -118,32 +121,47 @@ public class UserList extends JPanel {
         });
 
         deleteButton = new JButton("Delete");
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                User user = userList.getSelectedValue();
-                if (user.getName().equals(sessionToken.getUserName())){
-                    JOptionPane.showMessageDialog(UserList.this,
-                            "Can't delete your own account!",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    deleteUser(user);
-                }
+        deleteButton.addActionListener(e -> {
+            User user = userList.getSelectedValue();
+            if (user.getName().equals(sessionToken.getUserName())){
+                JOptionPane.showMessageDialog(UserList.this,
+                        "Can't delete your own account!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+            else {
+                deleteUser(user);
+            }
 
-                DefaultListModel<User> newModel = new DefaultListModel<>();
-                newModel.addAll(getUsers());
+            DefaultListModel<User> newModel = new DefaultListModel<>();
+            newModel.addAll(getUsers());
 
-                userList.setModel(newModel);
-                userList.updateUI();
-                scrollPane.updateUI();
-                validate();
-                repaint();
+            userList.setModel(newModel);
+            userList.updateUI();
+            scrollPane.updateUI();
+            validate();
+            repaint();
+        });
+
+        permsButton = new JButton("Change Permissions");
+        permsButton.addActionListener(e ->{
+            User user = userList.getSelectedValue();
+            if (user.getName().equals(sessionToken.getUserName())){
+                JOptionPane.showMessageDialog(UserList.this,
+                        "Can't Change your own Account Permissions!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+            else {
+                changePerms = new ChangePermissions(getSize(), serverIP, serverPort, sessionToken, user.getName());
+                changePerms.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                changePerms.setVisible(true);
+                changePerms.setTitle("Change User Permissions");
             }
         });
         add(createButton);
         add(editButton);
+        add(permsButton);
         add(deleteButton);
     }
 

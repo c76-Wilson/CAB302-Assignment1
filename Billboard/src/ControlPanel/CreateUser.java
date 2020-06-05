@@ -159,7 +159,7 @@ public class CreateUser extends JDialog {
         setVisible(true);
     }
 
-    private void makeUser() throws Exception {
+    private void makeUser() {
         LinkedList<String> perms = new LinkedList<>();
         if(boolCreate == true){
             perms.add("Create Billboard");
@@ -237,6 +237,7 @@ public class CreateUser extends JDialog {
             }
         }
     }
+
     class CheckListener implements ItemListener {
         @Override
         public void itemStateChanged(ItemEvent event) {

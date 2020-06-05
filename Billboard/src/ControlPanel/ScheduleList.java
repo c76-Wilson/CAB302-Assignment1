@@ -46,7 +46,7 @@ public class ScheduleList extends JPanel {
         DefaultListModel<ScheduledBillboard> billboardsModel = new DefaultListModel<>();
         billboardsModel.addAll(billboards);
 
-        scheduledBillboardList = new JList<ScheduledBillboard>(billboardsModel);
+        scheduledBillboardList = new JList<>(billboardsModel);
 
         scheduledBillboardList.setVisibleRowCount(8);
         scheduledBillboardList.setCellRenderer(new ScheduleRenderer());
@@ -75,20 +75,17 @@ public class ScheduleList extends JPanel {
 
         removeScheduleButton = new JButton("Remove");
         removeScheduleButton.setEnabled(false);
-        removeScheduleButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeSchedule(scheduledBillboardList.getSelectedValue());
+        removeScheduleButton.addActionListener(e -> {
+            removeSchedule(scheduledBillboardList.getSelectedValue());
 
-                DefaultListModel<ScheduledBillboard> newModel = new DefaultListModel<>();
-                newModel.addAll(getScheduledBillboards());
+            DefaultListModel<ScheduledBillboard> newModel = new DefaultListModel<>();
+            newModel.addAll(getScheduledBillboards());
 
-                scheduledBillboardList.setModel(newModel);
-                scheduledBillboardList.updateUI();
-                scrollPane.updateUI();
-                validate();
-                repaint();
-            }
+            scheduledBillboardList.setModel(newModel);
+            scheduledBillboardList.updateUI();
+            scrollPane.updateUI();
+            validate();
+            repaint();
         });
 
         add(removeScheduleButton);

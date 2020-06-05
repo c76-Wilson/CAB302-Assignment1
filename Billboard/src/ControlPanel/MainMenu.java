@@ -119,12 +119,7 @@ public class MainMenu extends JFrame{
             }
         });
         mainMenu = new JButton("Main Menu");
-        mainMenu.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                layout.show(mainPanel, "Menu");
-            }
-        });
+        mainMenu.addActionListener(e -> layout.show(mainPanel, "Menu"));
 
         menu.add(billboards);
         menu.add(schedules);
