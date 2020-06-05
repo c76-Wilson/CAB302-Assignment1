@@ -33,13 +33,20 @@ public class ScheduleList extends JPanel {
     JList<ScheduledBillboard> scheduledBillboardList;
     JButton removeScheduleButton;
 
-    public ScheduleList(Dimension size, SessionToken sessionToken, String serverIP, int serverPort) {
+    public ScheduleList(SessionToken sessionToken, String serverIP, int serverPort) {
         this.sessionToken = sessionToken;
         this.serverIP = serverIP;
         this.serverPort = serverPort;
-        setSize(size);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         initComponents(getScheduledBillboards());
+    }
+
+    public ScheduleList(SessionToken sessionToken, String serverIP, int serverPort, LinkedList<ScheduledBillboard> billboards) {
+        this.sessionToken = sessionToken;
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        initComponents(billboards);
     }
 
     private void initComponents(LinkedList<ScheduledBillboard> billboards) {
@@ -69,7 +76,7 @@ public class ScheduleList extends JPanel {
         });
 
         JScrollPane scrollPane = new JScrollPane(scheduledBillboardList);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         add(scrollPane);
 

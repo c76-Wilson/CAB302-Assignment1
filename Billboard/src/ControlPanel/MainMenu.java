@@ -1,6 +1,5 @@
 package ControlPanel;
 
-import Helper.Billboard;
 import Helper.SessionToken;
 
 import javax.swing.*;
@@ -20,6 +19,7 @@ public class MainMenu extends JFrame{
     BillboardList billboardList;
     UserList userList;
     ScheduleList scheduleList;
+    ScheduleCalendar scheduleCalendar;
     ChangePassword changePassword;
 
     // Layout
@@ -67,11 +67,22 @@ public class MainMenu extends JFrame{
             billboardList.setTitle("Billboards");
         });
         schedules = new JButton("Schedule");
+<<<<<<< HEAD
         schedules.addActionListener(e -> {
             scheduleList = new ScheduleList(getSize(), sessionToken, serverIP, serverPort);
             scheduleList.add(mainMenu);
             mainPanel.add(scheduleList, "Schedule");
             layout.show(mainPanel, "Schedule");
+=======
+        schedules.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                scheduleCalendar = new ScheduleCalendar(getSize(), sessionToken, serverIP, serverPort);
+                scheduleCalendar.add(mainMenu, BorderLayout.SOUTH);
+                mainPanel.add(scheduleCalendar, "Schedule");
+                layout.show(mainPanel, "Schedule");
+            }
+>>>>>>> a42626de6163c8344a0738680e8c42b279230b3b
         });
         users = new JButton("Users");
         users.addActionListener(new ActionListener() {
@@ -106,7 +117,7 @@ public class MainMenu extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 sessionToken = null;
 
-                Login login = new Login();
+                ControlPanel login = new ControlPanel();
                 dispose();
                 login.setVisible(true);
             }
