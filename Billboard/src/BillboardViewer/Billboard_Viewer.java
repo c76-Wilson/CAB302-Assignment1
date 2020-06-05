@@ -99,6 +99,8 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         //code to create panel for required components
         mainPanel = createPanel();
         mainPanel.setFocusable(true);
+        mainPanel.addKeyListener(this);
+        mainPanel.addMouseListener(this);
 
 
         msg_panel = createPanel();
@@ -107,11 +109,14 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         msg_panel.addMouseListener(this);
 
         img_panel = createPanel();
+        img_panel.setFocusable(true);
         img_panel.addKeyListener(this);
         img_panel.addMouseListener(this);
 
         info_panel = createPanel();
         info_panel.setFocusable(true);
+        info_panel.addKeyListener(this);
+        info_panel.addMouseListener(this);
 
 
 
@@ -538,6 +543,7 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         }
         //if pic
         else if(pic_created&!info_created&!msg_created){
+
             pic_size = new Dimension((int)screenSize.getWidth()/2,(int)screenSize.getHeight()/2);
         }
 
@@ -598,33 +604,6 @@ public class Billboard_Viewer extends JFrame implements Runnable, KeyListener, M
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-    }
-
-
-    /**
-     *
-     * This method adds the components passed to the mainpanel using the passed parameters to format
-     * the layout
-     *
-     *
-     *
-     * @param component
-     * @param layout
-     * @param layoutConstraints
-     * @param row
-     * @param column
-     * @param width
-     * @param height
-     */
-
-    private void addComponent(Component component,GridBagLayout layout,GridBagConstraints layoutConstraints, int row,
-                              int column, int width, int height) {
-        layoutConstraints.gridx = column;
-        layoutConstraints.gridy = row;
-        layoutConstraints.gridwidth = width;
-        layoutConstraints.gridheight = height;
-        layout.setConstraints(component, layoutConstraints);
-        mainPanel.add(component,layoutConstraints);
     }
 
 
