@@ -2,6 +2,7 @@ package ControlPanel;
 
 import Helper.Password;
 import Helper.Requests.CreateUserRequest;
+import Helper.Requests.ScheduleBillboardRequest;
 import Helper.Responses.ErrorMessage;
 import Helper.SessionToken;
 
@@ -14,12 +15,14 @@ import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.LinkedList;
+import java.util.logging.ErrorManager;
 
 public class CreateUser extends JDialog {
     //Create User Components
-    private JFrame userFrame;
-    private JPanel userPanel;
     private GridBagConstraints userGrid;
     private JLabel labelUser;
     private JLabel labelPass;
@@ -53,13 +56,9 @@ public class CreateUser extends JDialog {
     }
 
     private void createUser(Dimension window) {
-        userFrame = new JFrame("Create User");
-        userFrame.setSize(window);
-        userFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
-        userPanel = new JPanel(new GridBagLayout());
-        userFrame.add(userPanel);
-        userPanel.setVisible(true);
+        setSize(window);
+        setLayout(new GridBagLayout());
+        setTitle("Create User");
 
         userGrid = new GridBagConstraints();
 
@@ -67,7 +66,7 @@ public class CreateUser extends JDialog {
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 1;
         userGrid.gridy = 0;
-        userPanel.add(labelUser, userGrid);
+        add(labelUser, userGrid);
 
         setUsername = new JTextField(20);
         setUsername.setDocument(new PlainDocument() {
@@ -85,55 +84,55 @@ public class CreateUser extends JDialog {
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 2;
         userGrid.gridy = 0;
-        userPanel.add(setUsername, userGrid);
+        add(setUsername, userGrid);
 
         nameCount = new JLabel(nameChars + " / 50 Characters");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 3;
         userGrid.gridy = 0;
-        userPanel.add(nameCount, userGrid);
+        add(nameCount, userGrid);
 
         labelPass = new JLabel("Password: ");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 1;
         userGrid.gridy = 1;
-        userPanel.add(labelPass, userGrid);
+        add(labelPass, userGrid);
 
         setPassword = new JPasswordField(20);
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 2;
         userGrid.gridy = 1;
-        userPanel.add(setPassword, userGrid);
+        add(setPassword, userGrid);
 
         enableCreate = new JCheckBox("Create Billboards");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 0;
         userGrid.gridy = 2;
-        userPanel.add(enableCreate, userGrid);
+        add(enableCreate, userGrid);
 
         enableEdit = new JCheckBox("Edit All Billboards");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 1;
         userGrid.gridy = 2;
-        userPanel.add(enableEdit, userGrid);
+        add(enableEdit, userGrid);
 
         enableSchedule = new JCheckBox("Schedule Billboards");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 3;
         userGrid.gridy = 2;
-        userPanel.add(enableSchedule, userGrid);
+        add(enableSchedule, userGrid);
 
         enableUser = new JCheckBox("Edit Users");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 4;
         userGrid.gridy = 2;
-        userPanel.add(enableUser, userGrid);
+        add(enableUser, userGrid);
 
         userMake = new JButton("Create User");
         userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 2;
         userGrid.gridy = 3;
-        userPanel.add(userMake, userGrid);
+        add(userMake, userGrid);
 
         CheckListener checkL = new CheckListener();
         enableCreate.addItemListener(checkL);
@@ -148,8 +147,6 @@ public class CreateUser extends JDialog {
                 ex.printStackTrace();
             }
         });
-
-        userFrame.setVisible(true);
     }
 
     private void makeUser() throws Exception {
@@ -171,7 +168,35 @@ public class CreateUser extends JDialog {
         String hashed = Password.hash(dummy);
         String token = sessionToken.getSessionToken();
         CreateUserRequest userRequest = new CreateUserRequest(nameUser, perms, hashed, token);
-        System.out.println(userRequest.toString());
+        Object obj = null;
+        try{
+            obj = userTest(userRequest);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        if(obj.getClass() == ErrorMessage.class){
+            JOptionPane failBox = new JOptionPane();
+            failBox.showMessageDialog(this, "<html>User Not Created! ERROR:<br/>"
+                            + "<i>" + ((ErrorMessage) obj).getErrorMessage() + "<i/><html/>",
+                    "Couldn't Create User", JOptionPane.WARNING_MESSAGE);
+        } else if (obj.getClass() == Boolean.class){
+            JOptionPane successBox = new JOptionPane();
+            ImageIcon icon = new ImageIcon(this.getClass().getResource("/images/Checkmark_green.jpg"));
+            successBox.showMessageDialog(this, "User Successfully Created!",
+                    "User Created", JOptionPane.INFORMATION_MESSAGE, icon);
+            this.setModalityType(ModalityType.MODELESS);
+            this.setVisible(false);
+            this.dispose();
+        }
+    }
+
+    private Object userTest(CreateUserRequest user) throws Exception{
+        Socket socket = new Socket("localhost", 4444);
+        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+        output.writeObject(user);
+        ObjectInputStream clientInputStream = new ObjectInputStream(socket.getInputStream());
+        Object obj = clientInputStream.readObject();
+        return obj;
     }
 
     class TextListener implements DocumentListener {
