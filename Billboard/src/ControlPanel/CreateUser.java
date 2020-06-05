@@ -18,7 +18,6 @@ import java.util.LinkedList;
 
 public class CreateUser extends JDialog {
     //Create User Components
-    private JFrame userFrame;
     private JPanel userPanel;
     private GridBagConstraints userGrid;
     private JLabel labelUser;
@@ -53,19 +52,17 @@ public class CreateUser extends JDialog {
     }
 
     private void createUser(Dimension window) {
-        userFrame = new JFrame("Create User");
-        userFrame.setSize(window);
-        userFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setSize(window);
 
         userPanel = new JPanel(new GridBagLayout());
-        userFrame.add(userPanel);
+        add(userPanel);
         userPanel.setVisible(true);
 
         userGrid = new GridBagConstraints();
 
         labelUser = new JLabel("Username: ");
         userGrid.fill = GridBagConstraints.VERTICAL;
-        userGrid.gridx = 1;
+        userGrid.gridx = 0;
         userGrid.gridy = 0;
         userPanel.add(labelUser, userGrid);
 
@@ -83,54 +80,57 @@ public class CreateUser extends JDialog {
         setUsername.getDocument().putProperty("Area", setUsername);
         setUsername.getDocument().addDocumentListener(new TextListener());
         userGrid.fill = GridBagConstraints.VERTICAL;
-        userGrid.gridx = 2;
+        userGrid.gridx = 1;
         userGrid.gridy = 0;
+        userGrid.gridwidth = 2;
         userPanel.add(setUsername, userGrid);
 
         nameCount = new JLabel(nameChars + " / 50 Characters");
         userGrid.fill = GridBagConstraints.VERTICAL;
-        userGrid.gridx = 3;
+        userGrid.gridx = 2;
         userGrid.gridy = 0;
+        userGrid.gridwidth = 1;
         userPanel.add(nameCount, userGrid);
 
         labelPass = new JLabel("Password: ");
         userGrid.fill = GridBagConstraints.VERTICAL;
-        userGrid.gridx = 1;
+        userGrid.gridx = 0;
         userGrid.gridy = 1;
         userPanel.add(labelPass, userGrid);
 
         setPassword = new JPasswordField(20);
         userGrid.fill = GridBagConstraints.VERTICAL;
-        userGrid.gridx = 2;
+        userGrid.gridx = 1;
         userGrid.gridy = 1;
+        userGrid.gridwidth = 2;
         userPanel.add(setPassword, userGrid);
 
         enableCreate = new JCheckBox("Create Billboards");
-        userGrid.fill = GridBagConstraints.VERTICAL;
-        userGrid.gridx = 0;
-        userGrid.gridy = 2;
+        userGrid.anchor = GridBagConstraints.LINE_START;
+        userGrid.gridx = 3;
+        userGrid.gridy = 0;
+        userGrid.gridwidth = 1;
         userPanel.add(enableCreate, userGrid);
 
         enableEdit = new JCheckBox("Edit All Billboards");
-        userGrid.fill = GridBagConstraints.VERTICAL;
-        userGrid.gridx = 1;
-        userGrid.gridy = 2;
+        userGrid.gridx = 4;
+        userGrid.gridy = 0;
         userPanel.add(enableEdit, userGrid);
 
         enableSchedule = new JCheckBox("Schedule Billboards");
-        userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 3;
-        userGrid.gridy = 2;
+        userGrid.gridy = 1;
         userPanel.add(enableSchedule, userGrid);
 
         enableUser = new JCheckBox("Edit Users");
-        userGrid.fill = GridBagConstraints.VERTICAL;
         userGrid.gridx = 4;
-        userGrid.gridy = 2;
+        userGrid.gridy = 1;
         userPanel.add(enableUser, userGrid);
 
         userMake = new JButton("Create User");
         userGrid.fill = GridBagConstraints.VERTICAL;
+        userGrid.anchor = GridBagConstraints.CENTER;
+        userGrid.gridwidth = GridBagConstraints.REMAINDER;
         userGrid.gridx = 2;
         userGrid.gridy = 3;
         userPanel.add(userMake, userGrid);
@@ -149,7 +149,7 @@ public class CreateUser extends JDialog {
             }
         });
 
-        userFrame.setVisible(true);
+        setVisible(true);
     }
 
     private void makeUser() throws Exception {

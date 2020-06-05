@@ -56,7 +56,7 @@ public class Evaluate {
         try {
             // Update schedules where passed schedule time and recurring
             Statement statement = con.createStatement();
-            String sql = String.format("UPDATE schedules SET StartTime = StartTime + INTERVAL RecurringEvery MINUTE WHERE ID IN (SELECT ID FROM schedules WHERE RecurringEvery != null AND StartTime + INTERVAL Duration MINUTE <= NOW());");
+            String sql = String.format("UPDATE schedules SET StartTime = StartTime + INTERVAL RecurringEvery MINUTE WHERE ID IN (SELECT ID FROM schedules WHERE RecurringEvery IS NOT null AND StartTime + INTERVAL Duration MINUTE <= NOW());");
             statement.executeQuery(sql);
         }
         catch (Exception e){
@@ -187,9 +187,11 @@ public class Evaluate {
      * @return a list of billboards scheduled in the next 7 days if successful - otherwise returns ErrorMessage
      */
     public static Object EvaluateViewSchedule(Connection con){
+        UpdateNextScheduled(con);
+
         try {
             Statement statement = con.createStatement();
-            String sql = "SELECT b.Name, b.CreatorName, s.StartTime, s.Duration FROM schedules s LEFT JOIN billboards b ON s.BillboardName = b.Name WHERE s.StartTime + INTERVAL s.Duration MINUTE >= NOW() AND s.StartTime < NOW() + INTERVAL 7 DAY;";
+            String sql = "SELECT b.Name, b.CreatorName, s.StartTime, s.Duration FROM schedules s LEFT JOIN billboards b ON s.BillboardName = b.Name WHERE s.StartTime + INTERVAL s.Duration MINUTE >= NOW() AND s.StartTime < NOW() + INTERVAL 7 DAY ORDER BY s.StartTime ASC;";
 
             ResultSet scheduleResult = statement.executeQuery(sql);
 

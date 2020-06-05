@@ -1,5 +1,6 @@
 package ControlPanel;
 
+import Helper.Billboard;
 import Helper.SessionToken;
 
 import javax.swing.*;
@@ -19,6 +20,7 @@ public class MainMenu extends JFrame{
     BillboardList billboardList;
     UserList userList;
     ScheduleList scheduleList;
+    ChangePassword changePassword;
 
     // Layout
     CardLayout layout = new CardLayout();
@@ -27,6 +29,7 @@ public class MainMenu extends JFrame{
     JButton billboards;
     JButton schedules;
     JButton users;
+    JButton setPassword;
     JButton logout;
 
     JButton mainMenu;
@@ -39,7 +42,6 @@ public class MainMenu extends JFrame{
         setSize(size);
 
         menu = new JPanel();
-        billboardList = new BillboardList(getSize(), sessionToken, serverIP, serverPort);
 
         mainPanel.setLayout(layout);
 
@@ -53,12 +55,15 @@ public class MainMenu extends JFrame{
     }
 
     private void initMenu() {
-        menu.setLayout(new GridLayout(4, 1));
+        menu.setLayout(new GridLayout(5, 1));
 
         billboards = new JButton("Billboards");
         billboards.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                billboardList = new BillboardList(getSize(), sessionToken, serverIP, serverPort);
+                billboardList.add(mainMenu);
+                mainPanel.add(billboardList, "Billboards");
                 layout.show(mainPanel, "Billboards");
             }
         });
@@ -80,6 +85,26 @@ public class MainMenu extends JFrame{
                 userList.add(mainMenu);
                 mainPanel.add(userList, "Users");
                 layout.show(mainPanel, "Users");
+            }
+        });
+        setPassword = new JButton("Change Your Password");
+        setPassword.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (changePassword == null) {
+                    changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
+                    changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    changePassword.setVisible(true);
+                    changePassword.setTitle("Change Password");
+                }
+                else if (!changePassword.isVisible()){
+                    changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
+                    changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    changePassword.setVisible(true);
+                    changePassword.setTitle("Change Password");
+                }
+                changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken);
+                changePassword.add(mainMenu);
             }
         });
         logout = new JButton("Logout");
@@ -104,12 +129,11 @@ public class MainMenu extends JFrame{
         menu.add(billboards);
         menu.add(schedules);
         menu.add(users);
+        menu.add(setPassword);
         menu.add(logout);
 
-        billboardList.add(mainMenu);
 
         mainPanel.add(menu, "Menu");
-        mainPanel.add(billboardList, "Billboards");
 
         add(mainPanel);
         layout.show(mainPanel, "Menu");

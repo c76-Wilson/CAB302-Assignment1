@@ -3,6 +3,7 @@ package Helper.Requests;
 import jdk.jfr.Timespan;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class RemoveFromScheduleRequest extends Request{
     //region Billboard Name
@@ -18,11 +19,11 @@ public class RemoveFromScheduleRequest extends Request{
     //endregion
 
     //region Time
-    private Date scheduleTime;
+    private Timestamp scheduleTime;
 
-    public Date getScheduleTime() { return scheduleTime; }
+    public Timestamp getScheduleTime() { return scheduleTime; }
 
-    public void setScheduleTime(Date scheduleTime) {
+    public void setScheduleTime(Timestamp scheduleTime) {
         this.scheduleTime = scheduleTime;
     }
     //endregion
@@ -39,7 +40,7 @@ public class RemoveFromScheduleRequest extends Request{
     }
     //endregion
 
-    public RemoveFromScheduleRequest(String billboardName, Date scheduleTime, String sessionToken) {
+    public RemoveFromScheduleRequest(String billboardName, Timestamp scheduleTime, String sessionToken) {
         this.setBillboardName(billboardName);
         this.setScheduleTime(scheduleTime);
         this.setSessionToken(sessionToken);

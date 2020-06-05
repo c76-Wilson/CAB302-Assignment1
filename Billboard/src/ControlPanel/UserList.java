@@ -26,7 +26,8 @@ public class UserList extends JPanel {
     String serverIP;
 
     // Dialogs
-    JDialog createUsers;
+    CreateUser createUsers;
+    ChangePassword changePassword;
 
     // Components
     JList<User> userList;
@@ -76,25 +77,18 @@ public class UserList extends JPanel {
 
         editButton = new JButton("Set Password");
         editButton.addActionListener(e -> {
-            if (createUsers == null) {
+            if (changePassword == null) {
                 User user = userList.getSelectedValue();
-                CreateUser createUser = new CreateUser(getSize(), serverIP, serverPort, sessionToken);
-                createUser.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken, user.getName());
+                changePassword.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                changePassword.setVisible(true);
+                changePassword.setTitle("Set Password");
             }
-            else if (!createUsers.isVisible()){
+            else if (!changePassword.isVisible()){
                 User user = userList.getSelectedValue();
-                CreateUser createUser = new CreateUser(getSize(), serverIP, serverPort, sessionToken);
-                createUser.setVisible(true);
+                changePassword = new ChangePassword(getSize(), serverIP, serverPort, sessionToken, user.getName());
+                changePassword.setVisible(true);
             }
-
-            DefaultListModel<User> newModel = new DefaultListModel<>();
-            newModel.addAll(getUsers());
-
-            userList.setModel(newModel);
-            userList.updateUI();
-            scrollPane.updateUI();
-            validate();
-            repaint();
         });
 
         createButton = new JButton("Create");
@@ -102,13 +96,14 @@ public class UserList extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (createUsers == null) {
-                    CreateUser createUser = new CreateUser(getSize(), serverIP, serverPort, sessionToken);
-                    createUser.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-                    createUser.setVisible(true);
+                    createUsers = new CreateUser(getSize(), serverIP, serverPort, sessionToken);
+                    createUsers.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+                    createUsers.setVisible(true);
+                    createUsers.setTitle("Create User");
                 }
                 else if (!createUsers.isVisible()){
-                    CreateUser createUser = new CreateUser(getSize(), serverIP, serverPort, sessionToken);
-                    createUser.setVisible(true);
+                    createUsers = new CreateUser(getSize(), serverIP, serverPort, sessionToken);
+                    createUsers.setVisible(true);
                 }
 
                 DefaultListModel<User> newModel = new DefaultListModel<>();
@@ -127,7 +122,15 @@ public class UserList extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 User user = userList.getSelectedValue();
-                deleteUser(user);
+                if (user.getName().equals(sessionToken.getUserName())){
+                    JOptionPane.showMessageDialog(UserList.this,
+                            "Can't delete your own account!",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+                else {
+                    deleteUser(user);
+                }
 
                 DefaultListModel<User> newModel = new DefaultListModel<>();
                 newModel.addAll(getUsers());

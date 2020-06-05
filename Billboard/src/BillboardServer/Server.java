@@ -457,11 +457,14 @@ public class Server implements Runnable {
 
                 return true;
             }
-            return new ErrorMessage("Request not recognised!");
+            else {
+                return new ErrorMessage("Request not recognised!");
+            }
         }
         catch(Exception e){
             return new ErrorMessage(e.getMessage());
         }
+        return null;
     }
 
     /**
